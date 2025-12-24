@@ -1,0 +1,1283 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Gestion des Anomalies - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE ANOMALIES SPÉCIFIQUE ===== */
+    .anomalies-header {
+        background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+        animation: fadeInDown 0.6s ease;
+    }
+    
+    .anomalies-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .anomalies-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    /* ===== STATS ANOMALIES ===== */
+    .anomaly-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .anomaly-stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border-top: 4px solid;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .anomaly-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .anomaly-stat-card.total { border-color: #7c3aed; }
+    .anomaly-stat-card.critical { border-color: #ef4444; }
+    .anomaly-stat-card.medium { border-color: #f59e0b; }
+    .anomaly-stat-card.low { border-color: #10b981; }
+    .anomaly-stat-card.resolved { border-color: #3b82f6; }
+    
+    .anomaly-stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 0.5rem;
+    }
+    
+    .anomaly-stat-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    
+    /* ===== FILTRES ANOMALIES ===== */
+    .anomaly-filters {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.1s;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1rem;
+    }
+    
+    .filter-tab {
+        padding: 0.75rem 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-tab:hover {
+        background: #e2e8f0;
+        color: #374151;
+    }
+    
+    .filter-tab.active {
+        background: #7c3aed;
+        color: white;
+        border-color: #7c3aed;
+    }
+    
+    .filter-tab .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* ===== GRAVITÉ ===== */
+    .gravite-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .gravite-elevee {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        animation: pulse-red 2s infinite;
+    }
+    
+    .gravite-moyenne {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    
+    .gravite-faible {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    @keyframes pulse-red {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    /* ===== CARTES ANOMALIES ===== */
+    .anomaly-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .anomaly-cards-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .anomaly-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+        animation: fadeInUp 0.6s ease;
+    }
+    
+    .anomaly-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .anomaly-card.critical { border-color: #ef4444; }
+    .anomaly-card.medium { border-color: #f59e0b; }
+    .anomaly-card.low { border-color: #10b981; }
+    
+    .anomaly-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .anomaly-card-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .anomaly-card-body {
+        padding: 1.5rem;
+    }
+    
+    .anomaly-description {
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .anomaly-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #6b7280;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .anomaly-student {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+    
+    .anomaly-student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .anomaly-student-info h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .anomaly-student-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    
+    /* ===== ACTIONS ANOMALIES ===== */
+    .anomaly-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .anomaly-action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .anomaly-action-btn.resolve {
+        background: #dcfce7;
+        color: #059669;
+        border-color: #86efac;
+    }
+    
+    .anomaly-action-btn.resolve:hover {
+        background: #bbf7d0;
+        transform: translateY(-2px);
+    }
+    
+    .anomaly-action-btn.ignore {
+        background: #f3f4f6;
+        color: #4b5563;
+        border-color: #d1d5db;
+    }
+    
+    .anomaly-action-btn.ignore:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
+    }
+    
+    .anomaly-action-btn.view {
+        background: #dbeafe;
+        color: #2563eb;
+        border-color: #93c5fd;
+    }
+    
+    .anomaly-action-btn.view:hover {
+        background: #bfdbfe;
+        transform: translateY(-2px);
+    }
+    
+    .anomaly-action-btn.delete {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fca5a5;
+    }
+    
+    .anomaly-action-btn.delete:hover {
+        background: #fecaca;
+        transform: translateY(-2px);
+    }
+    
+    /* ===== MODAL RÉSOLUTION ===== */
+    .resolution-modal .modal-body {
+        padding: 0;
+    }
+    
+    .resolution-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .resolution-step {
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: #f8fafc;
+        border-left: 4px solid #7c3aed;
+    }
+    
+    .resolution-step h6 {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #1f2937;
+    }
+    
+    /* ===== ANOMALIES RÉSOLUES ===== */
+    .resolved-anomalies {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.2s;
+    }
+    
+    .resolved-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .resolved-toggle {
+        background: none;
+        border: none;
+        color: #7c3aed;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .resolved-list {
+        display: none;
+    }
+    
+    .resolved-list.show {
+        display: block;
+    }
+    
+    .resolved-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        transition: background 0.3s ease;
+    }
+    
+    .resolved-item:hover {
+        background: #f8fafc;
+    }
+    
+    .resolved-item:last-child {
+        border-bottom: none;
+    }
+    
+    .resolved-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .resolved-date {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    
+    /* ===== AUCUNE ANOMALIE ===== */
+    .no-anomalies {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        animation: fadeInUp 0.6s ease;
+    }
+    
+    .no-anomalies-icon {
+        font-size: 4rem;
+        color: #10b981;
+        margin-bottom: 1.5rem;
+    }
+    
+    .no-anomalies h3 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-anomalies p {
+        color: #6b7280;
+        max-width: 500px;
+        margin: 0 auto 2rem;
+    }
+    
+    /* ===== EXPORT ===== */
+    .export-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.3s;
+    }
+    
+    .export-options {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .export-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .export-btn.pdf {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .export-btn.excel {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .export-btn.csv {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .export-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .anomaly-card:nth-child(1) { animation-delay: 0.1s; }
+    .anomaly-card:nth-child(2) { animation-delay: 0.2s; }
+    .anomaly-card:nth-child(3) { animation-delay: 0.3s; }
+    .anomaly-card:nth-child(4) { animation-delay: 0.4s; }
+    .anomaly-card:nth-child(5) { animation-delay: 0.5s; }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .anomaly-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .filter-tabs {
+            justify-content: center;
+        }
+        
+        .anomaly-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .anomaly-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .export-options {
+            justify-content: center;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .anomaly-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .anomaly-actions {
+            flex-direction: column;
+        }
+        
+        .anomaly-action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- En-tête de la page -->
+<div class="anomalies-header">
+    <h1 class="anomalies-title">
+        <i class="fas fa-exclamation-triangle me-2"></i>Gestion des Anomalies
+    </h1>
+    <p class="anomalies-subtitle">
+        Détection et résolution des problèmes dans les données collectées
+    </p>
+</div>
+
+<!-- Statistiques des anomalies -->
+<div class="anomaly-stats">
+    <div class="anomaly-stat-card total">
+        <div class="anomaly-stat-number" id="totalAnomalies">{{ anomalies.count }}</div>
+        <div class="anomaly-stat-label">Total des anomalies</div>
+    </div>
+    
+    <div class="anomaly-stat-card critical">
+        <div class="anomaly-stat-number" id="criticalAnomalies">0</div>
+        <div class="anomaly-stat-label">Critiques</div>
+    </div>
+    
+    <div class="anomaly-stat-card medium">
+        <div class="anomaly-stat-number" id="mediumAnomalies">0</div>
+        <div class="anomaly-stat-label">Moyennes</div>
+    </div>
+    
+    <div class="anomaly-stat-card low">
+        <div class="anomaly-stat-number" id="lowAnomalies">0</div>
+        <div class="anomaly-stat-label">Faibles</div>
+    </div>
+    
+    <div class="anomaly-stat-card resolved">
+        <div class="anomaly-stat-number" id="resolvedAnomalies">0</div>
+        <div class="anomaly-stat-label">Résolues</div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="anomaly-filters">
+    <div class="filter-tabs">
+        <div class="filter-tab active" onclick="filtrerAnomalies('all')">
+            <i class="fas fa-list"></i> Toutes
+            <span class="badge bg-secondary">{{ anomalies.count }}</span>
+        </div>
+        <div class="filter-tab" onclick="filtrerAnomalies('critical')">
+            <i class="fas fa-fire"></i> Critiques
+            <span class="badge bg-danger" id="countCritical">0</span>
+        </div>
+        <div class="filter-tab" onclick="filtrerAnomalies('medium')">
+            <i class="fas fa-exclamation-circle"></i> Moyennes
+            <span class="badge bg-warning" id="countMedium">0</span>
+        </div>
+        <div class="filter-tab" onclick="filtrerAnomalies('low')">
+            <i class="fas fa-info-circle"></i> Faibles
+            <span class="badge bg-success" id="countLow">0</span>
+        </div>
+        <div class="filter-tab" onclick="filtrerAnomalies('pending')">
+            <i class="fas fa-clock"></i> En attente
+            <span class="badge bg-primary" id="countPending">{{ anomalies.count }}</span>
+        </div>
+        <div class="filter-tab" onclick="filtrerAnomalies('resolved')">
+            <i class="fas fa-check-circle"></i> Résolues
+            <span class="badge bg-info" id="countResolved">0</span>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" 
+                       class="form-control" 
+                       placeholder="Rechercher une anomalie par description ou étudiant..."
+                       id="searchAnomalies"
+                       oninput="rechercherAnomalies()">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select class="form-control" id="sortAnomalies" onchange="trierAnomalies()">
+                <option value="recent">Plus récentes</option>
+                <option value="oldest">Plus anciennes</option>
+                <option value="critical">Gravité (critique → faible)</option>
+                <option value="low">Gravité (faible → critique)</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Section d'export -->
+<div class="export-section">
+    <h5 class="mb-3"><i class="fas fa-file-export me-2"></i>Export des anomalies</h5>
+    <div class="export-options">
+        <button class="export-btn pdf" onclick="exporterAnomalies('pdf')">
+            <i class="fas fa-file-pdf"></i> PDF
+        </button>
+        <button class="export-btn excel" onclick="exporterAnomalies('excel')">
+            <i class="fas fa-file-excel"></i> Excel
+        </button>
+        <button class="export-btn csv" onclick="exporterAnomalies('csv')">
+            <i class="fas fa-file-csv"></i> CSV
+        </button>
+        <button class="export-btn" style="background: #7c3aed; color: white;" onclick="genererRapport()">
+            <i class="fas fa-chart-bar"></i> Rapport détaillé
+        </button>
+    </div>
+</div>
+
+<!-- Anomalies en attente -->
+{% if anomalies %}
+<div class="anomaly-cards-container" id="anomaliesList">
+    {% for anomalie in anomalies %}
+    <div class="anomaly-card {{ anomalie.gravite|lower }}" 
+         data-id="{{ anomalie.id }}"
+         data-gravite="{{ anomalie.gravite }}"
+         data-statut="{{ anomalie.statut }}"
+         data-etudiant="{% if anomalie.etudiant %}{{ anomalie.etudiant.nom }}{% endif %}">
+        
+        <div class="anomaly-card-header">
+            <h3 class="anomaly-card-title">
+                {% if anomalie.type_anomalie == 'DOUBLON' %}
+                    <i class="fas fa-copy text-warning"></i>
+                {% elif anomalie.type_anomalie == 'HORS_NORME' %}
+                    <i class="fas fa-chart-line text-danger"></i>
+                {% elif anomalie.type_anomalie == 'INCOHERENCE' %}
+                    <i class="fas fa-exclamation-circle text-primary"></i>
+                {% elif anomalie.type_anomalie == 'MANQUANTE' %}
+                    <i class="fas fa-question-circle text-info"></i>
+                {% else %}
+                    <i class="fas fa-keyboard text-secondary"></i>
+                {% endif %}
+                {{ anomalie.get_type_anomalie_display }}
+            </h3>
+            
+            <div>
+                {% if anomalie.gravite == 'ELEVEE' %}
+                    <span class="gravite-badge gravite-elevee">
+                        <i class="fas fa-fire"></i> Élevée
+                    </span>
+                {% elif anomalie.gravite == 'MOYENNE' %}
+                    <span class="gravite-badge gravite-moyenne">
+                        <i class="fas fa-exclamation-circle"></i> Moyenne
+                    </span>
+                {% else %}
+                    <span class="gravite-badge gravite-faible">
+                        <i class="fas fa-info-circle"></i> Faible
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="anomaly-card-body">
+            <!-- Informations étudiant -->
+            {% if anomalie.etudiant %}
+            <div class="anomaly-student">
+                <div class="anomaly-student-avatar">
+                    {% if anomalie.etudiant.photo %}
+                        <img src="{{ anomalie.etudiant.photo.url }}" 
+                             alt="{{ anomalie.etudiant.nom }}" 
+                             style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        {{ anomalie.etudiant.nom|slice:":1"|upper }}
+                    {% endif %}
+                </div>
+                <div class="anomaly-student-info">
+                    <h6>{{ anomalie.etudiant.nom }}</h6>
+                    <p>{{ anomalie.etudiant.code_enquete }} • {{ anomalie.etudiant.quartier }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Description -->
+            <div class="anomaly-description">
+                <p>{{ anomalie.description }}</p>
+                
+                {% if anomalie.depense %}
+                <div class="alert alert-light mt-2">
+                    <small>
+                        <i class="fas fa-receipt me-1"></i>
+                        <strong>Dépense concernée:</strong> 
+                        {{ anomalie.depense.get_categorie_display }} - 
+                        {{ anomalie.depense.montant|floatformat:0 }} FCFA
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Actions -->
+            <div class="anomaly-actions">
+                <button class="anomaly-action-btn resolve" onclick="resoudreAnomalie({{ anomalie.id }})">
+                    <i class="fas fa-check"></i> Marquer comme résolue
+                </button>
+                
+                <button class="anomaly-action-btn ignore" onclick="ignorerAnomalie({{ anomalie.id }})">
+                    <i class="fas fa-times"></i> Ignorer
+                </button>
+                
+                {% if anomalie.etudiant %}
+                <a href="{% url 'depense_create' anomalie.etudiant.id %}" class="anomaly-action-btn view">
+                    <i class="fas fa-edit"></i> Corriger
+                </a>
+                {% endif %}
+                
+                <button class="anomaly-action-btn delete" onclick="supprimerAnomalie({{ anomalie.id }})">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+            
+            <!-- Métadonnées -->
+            <div class="anomaly-meta">
+                <div>
+                    <i class="fas fa-calendar me-1"></i>
+                    {{ anomalie.date_detection|date:"d/m/Y H:i" }}
+                </div>
+                <div>
+                    <i class="fas fa-user me-1"></i>
+                    {{ anomalie.enqueteur.user.username }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- Aucune anomalie -->
+<div class="no-anomalies">
+    <div class="no-anomalies-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <h3>Aucune anomalie détectée</h3>
+    <p>Toutes les données collectées semblent cohérentes et valides. Continuez votre excellent travail !</p>
+    
+    <div class="mt-4">
+        <a href="{% url 'etudiant_list' %}" class="btn btn-primary-ecotrack me-2">
+            <i class="fas fa-users me-2"></i>Voir la liste des étudiants
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-chart-line me-2"></i>Retour au dashboard
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Anomalies résolues (cachées par défaut) -->
+<div class="resolved-anomalies">
+    <div class="resolved-header">
+        <h5 class="mb-0">
+            <i class="fas fa-history me-2"></i>Anomalies résolues
+        </h5>
+        <button class="resolved-toggle" onclick="toggleResolved()">
+            <i class="fas fa-chevron-down"></i>
+            <span>Voir l'historique</span>
+        </button>
+    </div>
+    
+    <div class="resolved-list" id="resolvedList">
+        <!-- Exemple d'anomalie résolue -->
+        <div class="resolved-item">
+            <div class="resolved-info">
+                <div class="gravite-badge gravite-faible" style="opacity: 0.7;">
+                    <i class="fas fa-info-circle"></i> Faible
+                </div>
+                <span>Donnée manquante corrigée - Jean Dupont</span>
+            </div>
+            <div class="resolved-date">
+                Résolue le 15/03/2025 par vous
+            </div>
+        </div>
+        
+        <div class="resolved-item">
+            <div class="resolved-info">
+                <div class="gravite-badge gravite-moyenne" style="opacity: 0.7;">
+                    <i class="fas fa-exclamation-circle"></i> Moyenne
+                </div>
+                <span>Valeur hors norme vérifiée - Marie Kong</span>
+            </div>
+            <div class="resolved-date">
+                Résolue le 14/03/2025 par admin
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de résolution -->
+<div class="modal fade" id="resolutionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Résoudre l'anomalie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="resolution-steps">
+                    <div class="resolution-step">
+                        <h6>1. Vérification des données</h6>
+                        <p>Examinez les données concernées et confirmez qu'il s'agit bien d'une anomalie.</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="step1">
+                            <label class="form-check-label" for="step1">
+                                J'ai vérifié les données et confirmé l'anomalie
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="resolution-step">
+                        <h6>2. Correction appliquée</h6>
+                        <p>Indiquez la correction que vous avez apportée.</p>
+                        <select class="form-control mb-2" id="correctionType">
+                            <option value="">Type de correction</option>
+                            <option value="data_fixed">Donnée corrigée</option>
+                            <option value="data_removed">Donnée supprimée</option>
+                            <option value="data_justified">Donnée justifiée</option>
+                            <option value="false_alarm">Fausse alerte</option>
+                        </select>
+                        <textarea class="form-control" 
+                                  id="correctionNotes" 
+                                  rows="3" 
+                                  placeholder="Notes sur la correction appliquée..."></textarea>
+                    </div>
+                    
+                    <div class="resolution-step">
+                        <h6>3. Prévention future</h6>
+                        <p>Suggérez des mesures pour éviter cette anomalie à l'avenir.</p>
+                        <textarea class="form-control" 
+                                  id="preventionNotes" 
+                                  rows="2" 
+                                  placeholder="Suggestions pour prévenir cette anomalie..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" onclick="confirmerResolution()">
+                    <i class="fas fa-check me-2"></i>Confirmer la résolution
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== INITIALISATION =====
+    $(document).ready(function() {
+        // Calculer les statistiques initiales
+        calculerStatsAnomalies();
+        
+        // Initialiser les tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Désactiver les boutons pour les anomalies résolues
+        $('.anomaly-card[data-statut="RESOLUE"] .anomaly-action-btn').prop('disabled', true);
+    });
+    
+    // ===== STATISTIQUES =====
+    function calculerStatsAnomalies() {
+        let critical = 0, medium = 0, low = 0, resolved = 0;
+        
+        $('.anomaly-card').each(function() {
+            const gravite = $(this).data('gravite');
+            const statut = $(this).data('statut');
+            
+            if (statut === 'RESOLUE') {
+                resolved++;
+            } else {
+                switch(gravite) {
+                    case 'ELEVEE': critical++; break;
+                    case 'MOYENNE': medium++; break;
+                    case 'FAIBLE': low++; break;
+                }
+            }
+        });
+        
+        // Mettre à jour les compteurs
+        $('#criticalAnomalies').text(critical);
+        $('#mediumAnomalies').text(medium);
+        $('#lowAnomalies').text(low);
+        $('#resolvedAnomalies').text(resolved);
+        
+        // Mettre à jour les badges des filtres
+        $('#countCritical').text(critical);
+        $('#countMedium').text(medium);
+        $('#countLow').text(low);
+        $('#countResolved').text(resolved);
+        $('#countPending').text(critical + medium + low);
+    }
+    
+    // ===== FILTRAGE =====
+    function filtrerAnomalies(type) {
+        // Mettre à jour les onglets actifs
+        $('.filter-tab').removeClass('active');
+        $(event.target).closest('.filter-tab').addClass('active');
+        
+        // Filtrer les cartes
+        $('.anomaly-card').each(function() {
+            const gravite = $(this).data('gravite');
+            const statut = $(this).data('statut');
+            let show = false;
+            
+            switch(type) {
+                case 'all':
+                    show = true;
+                    break;
+                case 'critical':
+                    show = gravite === 'ELEVEE' && statut !== 'RESOLUE';
+                    break;
+                case 'medium':
+                    show = gravite === 'MOYENNE' && statut !== 'RESOLUE';
+                    break;
+                case 'low':
+                    show = gravite === 'FAIBLE' && statut !== 'RESOLUE';
+                    break;
+                case 'pending':
+                    show = statut !== 'RESOLUE';
+                    break;
+                case 'resolved':
+                    show = statut === 'RESOLUE';
+                    break;
+            }
+            
+            if (show) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        
+        // Afficher un message si aucun résultat
+        const visible = $('.anomaly-card:visible').length;
+        if (visible === 0) {
+            $('#anomaliesList').html(`
+                <div class="col-12">
+                    <div class="alert alert-info text-center py-5">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <h4>Aucune anomalie trouvée</h4>
+                        <p>Aucune anomalie ne correspond à vos critères de filtrage.</p>
+                        <button class="btn btn-primary mt-2" onclick="filtrerAnomalies('all')">
+                            Voir toutes les anomalies
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+    }
+    
+    function rechercherAnomalies() {
+        const searchTerm = $('#searchAnomalies').val().toLowerCase();
+        
+        if (searchTerm.length === 0) {
+            $('.anomaly-card').show();
+            return;
+        }
+        
+        $('.anomaly-card').each(function() {
+            const description = $(this).find('.anomaly-description').text().toLowerCase();
+            const etudiant = $(this).data('etudiant') || '';
+            const type = $(this).find('.anomaly-card-title').text().toLowerCase();
+            
+            const match = description.includes(searchTerm) || 
+                         etudiant.toLowerCase().includes(searchTerm) ||
+                         type.includes(searchTerm);
+            
+            if (match) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+    
+    function trierAnomalies() {
+        const sortBy = $('#sortAnomalies').val();
+        const container = $('#anomaliesList');
+        const cards = container.find('.anomaly-card').toArray();
+        
+        cards.sort((a, b) => {
+            const aElement = $(a);
+            const bElement = $(b);
+            
+            switch(sortBy) {
+                case 'recent':
+                    // Pour les dates, on aurait besoin de stocker la date réelle
+                    return 0;
+                    
+                case 'oldest':
+                    return 0;
+                    
+                case 'critical':
+                    const order = { 'ELEVEE': 0, 'MOYENNE': 1, 'FAIBLE': 2 };
+                    return order[aElement.data('gravite')] - order[bElement.data('gravite')];
+                    
+                case 'low':
+                    const orderReverse = { 'ELEVEE': 2, 'MOYENNE': 1, 'FAIBLE': 0 };
+                    return orderReverse[aElement.data('gravite')] - orderReverse[bElement.data('gravite')];
+                    
+                default:
+                    return 0;
+            }
+        });
+        
+        // Réorganiser les cartes
+        cards.forEach(card => container.append(card));
+    }
+    
+    // ===== ACTIONS SUR ANOMALIES =====
+    let anomalieCourante = null;
+    
+    function resoudreAnomalie(id) {
+        anomalieCourante = id;
+        
+        // Réinitialiser le formulaire modal
+        $('#step1').prop('checked', false);
+        $('#correctionType').val('');
+        $('#correctionNotes').val('');
+        $('#preventionNotes').val('');
+        
+        // Afficher le modal
+        new bootstrap.Modal(document.getElementById('resolutionModal')).show();
+    }
+    
+    function confirmerResolution() {
+        if (!anomalieCourante) return;
+        
+        const step1 = $('#step1').prop('checked');
+        const correctionType = $('#correctionType').val();
+        const correctionNotes = $('#correctionNotes').val();
+        
+        if (!step1 || !correctionType) {
+            alert('Veuillez compléter toutes les étapes requises.');
+            return;
+        }
+        
+        // Simulation de résolution
+        $(`.anomaly-card[data-id="${anomalieCourante}"]`).fadeOut(300, function() {
+            $(this).remove();
+            calculerStatsAnomalies();
+            showToast('Anomalie marquée comme résolue', 'success');
+        });
+        
+        // Fermer le modal
+        bootstrap.Modal.getInstance(document.getElementById('resolutionModal')).hide();
+        
+        // Ajouter à l'historique des résolues
+        ajouterAHistorique(anomalieCourante);
+    }
+    
+    function ignorerAnomalie(id) {
+        if (confirm('Ignorer cette anomalie ? Elle restera dans la liste mais sera marquée comme ignorée.')) {
+            $(`.anomaly-card[data-id="${id}"]`).css('opacity', '0.5');
+            showToast('Anomalie ignorée', 'info');
+        }
+    }
+    
+    function supprimerAnomalie(id) {
+        if (confirm('Supprimer définitivement cette anomalie ? Cette action est irréversible.')) {
+            $(`.anomaly-card[data-id="${id}"]`).fadeOut(300, function() {
+                $(this).remove();
+                calculerStatsAnomalies();
+                showToast('Anomalie supprimée', 'success');
+            });
+        }
+    }
+    
+    function ajouterAHistorique(id) {
+        // Dans une vraie application, on enverrait une requête AJAX
+        // Pour l'instant, on simule
+        const card = $(`.anomaly-card[data-id="${id}"]`);
+        const description = card.find('.anomaly-description p').text();
+        const etudiant = card.data('etudiant');
+        
+        const newItem = `
+            <div class="resolved-item">
+                <div class="resolved-info">
+                    <div class="gravite-badge gravite-faible" style="opacity: 0.7;">
+                        <i class="fas fa-check-circle"></i> Résolue
+                    </div>
+                    <span>${description.substring(0, 50)}... - ${etudiant}</span>
+                </div>
+                <div class="resolved-date">
+                    Résolue le ${new Date().toLocaleDateString('fr-FR')} par vous
+                </div>
+            </div>
+        `;
+        
+        $('#resolvedList').prepend(newItem);
+    }
+    
+    // ===== ANOMALIES RÉSOLUES =====
+    function toggleResolved() {
+        $('#resolvedList').toggleClass('show');
+        const button = $('.resolved-toggle');
+        
+        if ($('#resolvedList').hasClass('show')) {
+            button.find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            button.find('span').text('Masquer l\'historique');
+        } else {
+            button.find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            button.find('span').text('Voir l\'historique');
+        }
+    }
+    
+    // ===== EXPORT =====
+    function exporterAnomalies(format) {
+        showToast(`Export ${format.toUpperCase()} en cours...`, 'info');
+        
+        setTimeout(() => {
+            let content = '';
+            const date = new Date().toISOString().split('T')[0];
+            
+            switch(format) {
+                case 'pdf':
+                    content = 'Contenu PDF généré';
+                    break;
+                case 'excel':
+                    content = 'Contenu Excel généré';
+                    break;
+                case 'csv':
+                    content = 'Type;Gravité;Étudiant;Description;Date\n';
+                    $('.anomaly-card').each(function() {
+                        const type = $(this).find('.anomaly-card-title').text();
+                        const gravite = $(this).data('gravite');
+                        const etudiant = $(this).data('etudiant') || 'N/A';
+                        const description = $(this).find('.anomaly-description p').text().replace(/;/g, ',');
+                        const date = $(this).find('.anomaly-meta div:first-child').text();
+                        
+                        content += `${type};${gravite};${etudiant};${description};${date}\n`;
+                    });
+                    break;
+            }
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `anomalies_${date}.${format}`;
+            link.click();
+            
+            showToast(`Export ${format.toUpperCase()} terminé`, 'success');
+        }, 1000);
+    }
+    
+    function genererRapport() {
+        showToast('Génération du rapport détaillé...', 'info');
+        
+        setTimeout(() => {
+            const rapport = `
+                RAPPORT D'ANOMALIES - ${new Date().toLocaleDateString('fr-FR')}
+                =============================================
+                
+                STATISTIQUES GLOBALES:
+                - Total anomalies: ${$('.anomaly-card').length}
+                - Critiques: ${$('#criticalAnomalies').text()}
+                - Moyennes: ${$('#mediumAnomalies').text()}
+                - Faibles: ${$('#lowAnomalies').text()}
+                - Résolues: ${$('#resolvedAnomalies').text()}
+                
+                DISTRIBUTION PAR TYPE:
+                - Doublons: ${$('.anomaly-card:contains("Doublon")').length}
+                - Hors norme: ${$('.anomaly-card:contains("HORS_NORME")').length}
+                - Incohérences: ${$('.anomaly-card:contains("INCOHERENCE")').length}
+                - Données manquantes: ${$('.anomaly-card:contains("MANQUANTE")').length}
+                
+                RECOMMANDATIONS:
+                1. Vérifier les données de logement dans le quartier Mokolo
+                2. Standardiser les formats de saisie des montants
+                3. Former les enquêteurs sur la détection des doublons
+                
+                GÉNÉRÉ AUTOMATIQUEMENT PAR ECOTRACK LOCAL
+            `;
+            
+            const blob = new Blob([rapport], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `rapport_anomalies_${new Date().toISOString().split('T')[0]}.txt`;
+            link.click();
+            
+            showToast('Rapport généré avec succès', 'success');
+        }, 1500);
+    }
+    
+    // ===== UTILITAIRES =====
+    function showToast(message, type = 'info') {
+        const toastHtml = `
+            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        $('.toast-container').remove();
+        $('body').append(`<div class="toast-container position-fixed bottom-0 end-0 p-3">${toastHtml}</div>`);
+        
+        const toastEl = $('.toast').last()[0];
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+        
+        setTimeout(() => toast.hide(), 3000);
+    }
+</script>
+{% endblock %}

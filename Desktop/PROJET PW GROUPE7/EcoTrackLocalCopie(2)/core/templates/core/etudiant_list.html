@@ -1,0 +1,1564 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Liste des Étudiants - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .list-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .list-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* ===== STATS RAPIDES ===== */
+    .quick-stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .stat-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-chip.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+    }
+    
+    /* ===== BARRE DE RECHERCHE AVANCÉE ===== */
+    .search-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+    }
+    
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+    
+    .form-group-enhanced {
+        margin-bottom: 0;
+    }
+    
+    .form-label-enhanced {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+    
+    .form-control-enhanced {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+    
+    .form-control-enhanced:focus {
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        height: fit-content;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+    }
+    
+    /* ===== BOUTONS D'ACTION DANS L'EN-TÊTE ===== */
+    .btn-primary-ecotrack {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary-ecotrack:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        color: white;
+    }
+    
+    .btn-outline-secondary {
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        color: #64748b;
+    }
+    
+    /* ===== COLONNE DE SÉLECTION ===== */
+    .selection-cell {
+        width: 40px;
+        text-align: center;
+    }
+    
+    .selection-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    /* ===== ACTIONS EN MASSE ===== */
+    .bulk-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        align-items: center;
+    }
+    
+    .bulk-select {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .bulk-select:hover {
+        background: #e2e8f0;
+    }
+    
+    .bulk-select input {
+        margin: 0;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .bulk-select label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .bulk-actions-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .bulk-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .bulk-btn-success {
+        background: #10b981;
+        color: white;
+    }
+    
+    .bulk-btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    .bulk-btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .bulk-btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+    }
+    
+    .bulk-btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+    
+    .bulk-btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+    }
+    
+    .bulk-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .list-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .bulk-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .bulk-actions-buttons {
+            flex-direction: column;
+        }
+        
+        .bulk-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ===== LISTE ÉTUDIANTS SPÉCIFIQUE ===== */
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .list-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .list-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* ===== STATS RAPIDES ===== */
+    .quick-stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .stat-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-chip.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+    }
+    
+    /* ===== BARRE DE RECHERCHE AVANCÉE ===== */
+    .search-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+    }
+    
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+    }
+    
+    /* ===== TABLEAU ÉLÉGANT ===== */
+    .students-table-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.1s;
+    }
+    
+    .students-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .students-table thead {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    
+    .students-table th {
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+    
+    .students-table th.sortable {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        transition: color 0.2s ease;
+    }
+    
+    .students-table th.sortable:hover {
+        color: #2563eb;
+    }
+    
+    .students-table th.sortable::after {
+        content: '↕';
+        margin-left: 0.5rem;
+        opacity: 0.5;
+        font-size: 0.8rem;
+    }
+    
+    .students-table th.sortable.asc::after {
+        content: '↑';
+        opacity: 1;
+        color: #2563eb;
+    }
+    
+    .students-table th.sortable.desc::after {
+        content: '↓';
+        opacity: 1;
+        color: #2563eb;
+    }
+    
+    .students-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .students-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .students-table tbody tr:hover {
+        background: #f8fafc;
+        transform: translateX(4px);
+    }
+    
+    .students-table td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        color: #374151;
+    }
+    
+    /* ===== CELLULES SPÉCIALES ===== */
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .student-name {
+        font-weight: 600;
+        color: #1f2937;
+        display: block;
+    }
+    
+    .student-code {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .quartier-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #f3f4f6;
+        color: #4b5563;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    /* ===== BADGES STATUT ===== */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-brouillon {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    
+    .status-complet {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .status-verifie {
+        background: rgba(37, 99, 235, 0.1);
+        color: #1d4ed8;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+    
+    .status-anomalie {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    /* ===== ACTIONS ===== */
+    .actions-cell {
+        white-space: nowrap;
+        width: 1%;
+    }
+    
+    .actions-menu {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+    }
+    
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .action-btn:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+    
+    .action-btn.view:hover { background: #dbeafe; color: #2563eb; border-color: #93c5fd; }
+    .action-btn.edit:hover { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+    .action-btn.add:hover { background: #dcfce7; color: #059669; border-color: #86efac; }
+    .action-btn.stats:hover { background: #e0e7ff; color: #4f46e5; border-color: #a5b4fc; }
+    .action-btn.alert:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+    .action-btn.delete:hover { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+    
+    .tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1f2937;
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        visibility: hidden;
+        opacity: 0;
+        transition: all 0.2s ease;
+        margin-bottom: 5px;
+        z-index: 1000;
+    }
+    
+    .tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #1f2937 transparent transparent transparent;
+    }
+    
+    /* ===== PAGINATION ===== */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    
+    .pagination-info {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .page-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #4b5563;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .page-btn:hover {
+        background: #f3f4f6;
+        transform: translateY(-1px);
+    }
+    
+    .page-btn.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+    }
+    
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .page-btn.disabled:hover {
+        background: white;
+        transform: none;
+    }
+    
+    /* ===== BOUTONS MASSE ===== */
+    .bulk-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .bulk-select {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .bulk-select:hover {
+        background: #e2e8f0;
+    }
+    
+    .bulk-select input {
+        margin: 0;
+    }
+    
+    /* ===== MODAL DÉTAILS ===== */
+    .student-modal .modal-body {
+        padding: 0;
+    }
+    
+    .student-profile {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .student-profile {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 992px) {
+        .students-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .list-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .actions-menu {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .pagination-container {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .table-row {
+        animation: fadeInUp 0.5s ease;
+        animation-fill-mode: both;
+    }
+    
+    .table-row:nth-child(1) { animation-delay: 0.1s; }
+    .table-row:nth-child(2) { animation-delay: 0.2s; }
+    .table-row:nth-child(3) { animation-delay: 0.3s; }
+    .table-row:nth-child(4) { animation-delay: 0.4s; }
+    .table-row:nth-child(5) { animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- En-tête de page -->
+<div class="list-header">
+    <div>
+        <h1 class="list-title">
+            <i class="fas fa-users me-2"></i>Liste des Étudiants
+        </h1>
+        <p class="list-subtitle">
+            Gestion complète de tous les étudiants enquêtés • Total: {{ etudiants.count }}
+        </p>
+    </div>
+    
+    <div class="d-flex gap-2">
+        <a href="{% url 'etudiant_create' %}" class="btn-primary-ecotrack">
+            <i class="fas fa-user-plus me-2"></i>Nouvel étudiant
+        </a>
+        <a href="{% url 'export_etudiants_csv' %}" class="btn-outline-secondary">
+            <i class="fas fa-file-export me-2"></i>Exporter
+        </a>
+        <button class="btn-outline-secondary" onclick="rafraichirListe()">
+            <i class="fas fa-sync-alt me-2"></i>Actualiser
+        </button>
+    </div>
+</div>
+
+<!-- Statistiques rapides -->
+<div class="quick-stats">
+    <div class="stat-chip" onclick="filtrerParStatut('')">
+        <i class="fas fa-users"></i>
+        <span>Tous</span>
+        <span class="badge bg-secondary ms-1">{{ etudiants.count }}</span>
+    </div>
+    {% if statut_counts %}
+    <div class="stat-chip" onclick="filtrerParStatut('BROUILLON')">
+        <i class="fas fa-edit"></i>
+        <span>Brouillons</span>
+        <span class="badge bg-warning ms-1">{{ statut_counts.BROUILLON|default:0 }}</span>
+    </div>
+    <div class="stat-chip" onclick="filtrerParStatut('COMPLET')">
+        <i class="fas fa-check-circle"></i>
+        <span>Complets</span>
+        <span class="badge bg-success ms-1">{{ statut_counts.COMPLET|default:0 }}</span>
+    </div>
+    <div class="stat-chip" onclick="filtrerParStatut('VERIFIE')">
+        <i class="fas fa-shield-alt"></i>
+        <span>Vérifiés</span>
+        <span class="badge bg-primary ms-1">{{ statut_counts.VERIFIE|default:0 }}</span>
+    </div>
+    <div class="stat-chip" onclick="filtrerParStatut('ANOMALIE')">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Anomalies</span>
+        <span class="badge bg-danger ms-1">{{ statut_counts.ANOMALIE|default:0 }}</span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Barre de recherche et filtres -->
+<div class="search-container">
+    <form class="search-form" id="searchForm" method="GET" action="{% url 'etudiant_list' %}">
+        <div class="form-group-enhanced">
+            <label class="form-label-enhanced mb-2">Recherche par nom</label>
+            <input type="text" 
+                   class="form-control-enhanced" 
+                   placeholder="Nom de l'étudiant..."
+                   name="nom"
+                   id="searchName"
+                   value="{{ request.GET.nom|default:'' }}">
+        </div>
+        
+        <div class="form-group-enhanced">
+            <label class="form-label-enhanced mb-2">Quartier</label>
+            <select class="form-control-enhanced" id="searchQuartier" name="quartier">
+                <option value="">Tous les quartiers</option>
+                {% for quartier in quartiers_uniques %}
+                    {% if quartier %}
+                    <option value="{{ quartier }}" 
+                            {% if request.GET.quartier == quartier %}selected{% endif %}>
+                        {{ quartier }}
+                    </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group-enhanced">
+            <label class="form-label-enhanced mb-2">Statut</label>
+            <select class="form-control-enhanced" id="searchStatut" name="statut">
+                <option value="">Tous les statuts</option>
+                <option value="BROUILLON" {% if request.GET.statut == 'BROUILLON' %}selected{% endif %}>Brouillon</option>
+                <option value="COMPLET" {% if request.GET.statut == 'COMPLET' %}selected{% endif %}>Complet</option>
+                <option value="VERIFIE" {% if request.GET.statut == 'VERIFIE' %}selected{% endif %}>Vérifié</option>
+                <option value="ANOMALIE" {% if request.GET.statut == 'ANOMALIE' %}selected{% endif %}>Anomalie</option>
+            </select>
+        </div>
+        
+        <div class="form-group-enhanced">
+            <label class="form-label-enhanced mb-2">Période</label>
+            <select class="form-control-enhanced" id="searchPeriode" name="periode">
+                <option value="">Toute période</option>
+                <option value="today" {% if request.GET.periode == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                <option value="week" {% if request.GET.periode == 'week' %}selected{% endif %}>7 derniers jours</option>
+                <option value="month" {% if request.GET.periode == 'month' %}selected{% endif %}>30 derniers jours</option>
+                <option value="quarter" {% if request.GET.periode == 'quarter' %}selected{% endif %}>3 derniers mois</option>
+            </select>
+        </div>
+        
+        <div class="form-group-enhanced">
+            <button type="submit" class="search-btn">
+                <i class="fas fa-search me-2"></i>Rechercher
+            </button>
+            <a href="{% url 'etudiant_list' %}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-times me-2"></i>Réinitialiser
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Tableau des étudiants -->
+<div class="students-table-container">
+    <div class="table-responsive">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th class="selection-cell">
+                        <input type="checkbox" id="selectAllHeader" class="selection-checkbox" onchange="selectionnerTous()">
+                    </th>
+                    <th class="sortable" onclick="trierTableau('nom')">
+                        Étudiant
+                    </th>
+                    <th class="sortable" onclick="trierTableau('age')">
+                        Âge / Sexe
+                    </th>
+                    <th class="sortable" onclick="trierTableau('quartier')">
+                        Quartier
+                    </th>
+                    <th class="sortable" onclick="trierTableau('niveau')">
+                        Niveau / École
+                    </th>
+                    <th class="sortable" onclick="trierTableau('statut')">
+                        Statut
+                    </th>
+                    <th class="sortable" onclick="trierTableau('date')">
+                        Date
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+                {% for etudiant in etudiants %}
+                <tr class="table-row" data-id="{{ etudiant.id }}" data-statut="{{ etudiant.statut|default:'' }}">
+                    <td class="selection-cell">
+                        <input type="checkbox" class="selection-checkbox student-checkbox" value="{{ etudiant.id }}">
+                    </td>
+                    
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="student-avatar">
+                                {% if etudiant.photo %}
+                                    <img src="{{ etudiant.photo.url }}" 
+                                         alt="{{ etudiant.nom }}" 
+                                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                    {{ etudiant.nom|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <span class="student-name">{{ etudiant.nom }}</span>
+                                <span class="student-code">{{ etudiant.code_enquete }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <td>
+                        <div>{{ etudiant.age }} ans</div>
+                        <div class="text-muted small">
+                            {{ etudiant.get_sexe_display }}
+                        </div>
+                    </td>
+                    
+                    <td>
+                        <span class="quartier-badge">{{ etudiant.quartier }}</span>
+                        {% if etudiant.gps_lat and etudiant.gps_lng %}
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-map-pin"></i> GPS
+                        </div>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        <div class="fw-medium">{{ etudiant.get_niveau_display }}</div>
+                        <div class="text-muted small">{{ etudiant.universite|truncatechars:20 }}</div>
+                    </td>
+                    
+                    <td>
+                        {% if etudiant.statut == 'BROUILLON' %}
+                            <span class="status-badge status-brouillon">
+                                <i class="fas fa-edit"></i> Brouillon
+                            </span>
+                        {% elif etudiant.statut == 'COMPLET' %}
+                            <span class="status-badge status-complet">
+                                <i class="fas fa-check-circle"></i> Complet
+                            </span>
+                        {% elif etudiant.statut == 'VERIFIE' %}
+                            <span class="status-badge status-verifie">
+                                <i class="fas fa-shield-alt"></i> Vérifié
+                            </span>
+                        {% elif etudiant.statut == 'ANOMALIE' %}
+                            <span class="status-badge status-anomalie">
+                                <i class="fas fa-exclamation-triangle"></i> Anomalie
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-brouillon">
+                                <i class="fas fa-edit"></i> Non défini
+                            </span>
+                        {% endif %}
+                        
+                        <!-- Nombre de dépenses -->
+                        <div class="text-muted small mt-1">
+                            <i class="fas fa-receipt"></i> 
+                            {{ etudiant.depenses.count }} dépense{{ etudiant.depenses.count|pluralize:"s" }}
+                        </div>
+                    </td>
+                    
+                    <td>
+                        <div>{{ etudiant.date_collecte|date:"d/m/Y" }}</div>
+                        <div class="text-muted small">
+                            {{ etudiant.date_collecte|date:"H:i" }}
+                        </div>
+                    </td>
+                    
+                    <td class="actions-cell">
+                        <div class="actions-menu">
+                            <!-- Voir fiche -->
+                            <a href="/etudiant/{{ etudiant.id }}/" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i>
+                                <span class="tooltip">Voir fiche complète</span>
+                            </a>
+                            
+                            <!-- Modifier -->
+                            <a href="/etudiant/{{ etudiant.id }}/modifier/" class="action-btn edit">
+                                <i class="fas fa-edit"></i>
+                                <span class="tooltip">Modifier identification</span>
+                            </a>
+                            
+                            <!-- Ajouter dépenses -->
+                            <a href="{% url 'depense_create' etudiant.id %}" class="action-btn add">
+                                <i class="fas fa-plus"></i>
+                                <span class="tooltip">Ajouter dépenses</span>
+                            </a>
+                            
+                            <!-- Statistiques -->
+                            <a href="/etudiant/{{ etudiant.id }}/stats/" class="action-btn stats">
+                                <i class="fas fa-chart-bar"></i>
+                                <span class="tooltip">Voir statistiques</span>
+                            </a>
+                            
+                            <!-- Supprimer -->
+                            <button class="action-btn delete" onclick="supprimerEtudiant({{ etudiant.id }})">
+                                <i class="fas fa-trash"></i>
+                                <span class="tooltip">Supprimer</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <div class="py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun étudiant trouvé</h5>
+                            <p class="text-muted">
+                                {% if request.GET.nom or request.GET.quartier or request.GET.statut or request.GET.periode %}
+                                    Aucun étudiant ne correspond à vos critères de recherche.
+                                {% else %}
+                                    Commencez par ajouter un nouvel étudiant.
+                                {% endif %}
+                            </p>
+                            <a href="{% url 'etudiant_create' %}" class="btn btn-primary mt-2">
+                                <i class="fas fa-user-plus me-2"></i>Ajouter votre premier étudiant
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Affichage de <span id="startRow">1</span> à <span id="endRow">{{ etudiants.count }}</span> 
+            sur <span id="totalRows">{{ etudiants.count }}</span> étudiants
+        </div>
+        
+        <div class="pagination" id="pagination">
+            {% comment %} La pagination sera ajoutée dynamiquement {% endcomment %}
+            {% if etudiants.has_other_pages %}
+                {% if etudiants.has_previous %}
+                    <a href="?{% if request.GET %}nom={{ request.GET.nom }}&quartier={{ request.GET.quartier }}&statut={{ request.GET.statut }}&periode={{ request.GET.periode }}&{% endif %}page={{ etudiants.previous_page_number }}" 
+                       class="page-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% else %}
+                    <span class="page-btn disabled">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                {% endif %}
+                
+                {% for i in etudiants.paginator.page_range %}
+                    {% if etudiants.number == i %}
+                        <span class="page-btn active">{{ i }}</span>
+                    {% else %}
+                        <a href="?{% if request.GET %}nom={{ request.GET.nom }}&quartier={{ request.GET.quartier }}&statut={{ request.GET.statut }}&periode={{ request.GET.periode }}&{% endif %}page={{ i }}" 
+                           class="page-btn">{{ i }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if etudiants.has_next %}
+                    <a href="?{% if request.GET %}nom={{ request.GET.nom }}&quartier={{ request.GET.quartier }}&statut={{ request.GET.statut }}&periode={{ request.GET.periode }}&{% endif %}page={{ etudiants.next_page_number }}" 
+                       class="page-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="page-btn disabled">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Actions en masse -->
+<div class="bulk-actions" id="bulkActions" style="display: none;">
+    <div class="bulk-select">
+        <input type="checkbox" id="selectAllBulk" onchange="selectionnerTousBulk()">
+        <label for="selectAllBulk">Sélectionner tout</label>
+    </div>
+    
+    <div class="bulk-actions-buttons">
+        <button class="bulk-btn bulk-btn-success" onclick="exporterSelection()" id="btnExportSelection">
+            <i class="fas fa-file-export me-1"></i>Exporter sélection
+        </button>
+        
+        <button class="bulk-btn bulk-btn-secondary" onclick="changerStatutMasse('VERIFIE')">
+            <i class="fas fa-shield-alt me-1"></i>Marquer vérifié
+        </button>
+        
+        <button class="bulk-btn bulk-btn-danger" onclick="supprimerSelection()">
+            <i class="fas fa-trash me-1"></i>Supprimer sélection
+        </button>
+        
+        <span class="text-muted ms-2" id="selectedCount">0 sélectionné(s)</span>
+    </div>
+</div>
+
+<!-- Modal de détails -->
+<div class="modal fade student-modal" id="studentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails de l'étudiant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="studentModalContent">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ===== INITIALISATION =====
+    $(document).ready(function() {
+        // Calculer les statistiques
+        calculerStats();
+        
+        // Initialiser les tooltips Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Récupérer les filtres depuis l'URL
+        chargerFiltresDepuisURL();
+        
+        // Initialiser les checkboxes
+        initialiserSelection();
+        
+        // Afficher les filtres actifs
+        afficherFiltresActifs();
+    });
+    
+    // ===== GESTION DE LA SÉLECTION =====
+    function initialiserSelection() {
+        // Écouter les changements sur les checkboxes
+        $('.student-checkbox').change(function() {
+            mettreAJourBulkActions();
+        });
+    }
+    
+    function mettreAJourBulkActions() {
+        const selectedCount = $('.student-checkbox:checked').length;
+        const bulkActions = $('#bulkActions');
+        const selectedCountSpan = $('#selectedCount');
+        const btnExport = $('#btnExportSelection');
+        
+        selectedCountSpan.text(selectedCount + ' sélectionné(s)');
+        
+        // Désactiver les boutons si rien n'est sélectionné
+        btnExport.prop('disabled', selectedCount === 0);
+        $('.bulk-btn-secondary, .bulk-btn-danger').prop('disabled', selectedCount === 0);
+        
+        // Afficher/masquer la barre d'actions en masse
+        if (selectedCount > 0) {
+            bulkActions.slideDown(300);
+        } else {
+            bulkActions.slideUp(300);
+        }
+        
+        // Mettre à jour la checkbox "Sélectionner tout" dans l'en-tête
+        const totalCheckboxes = $('.student-checkbox').length;
+        const allChecked = $('.student-checkbox:checked').length === totalCheckboxes;
+        $('#selectAllHeader').prop('checked', allChecked && totalCheckboxes > 0);
+        $('#selectAllBulk').prop('checked', allChecked && totalCheckboxes > 0);
+    }
+    
+    function selectionnerTous() {
+        const checked = $('#selectAllHeader').prop('checked');
+        $('.student-checkbox').prop('checked', checked);
+        mettreAJourBulkActions();
+    }
+    
+    function selectionnerTousBulk() {
+        const checked = $('#selectAllBulk').prop('checked');
+        $('.student-checkbox').prop('checked', checked);
+        mettreAJourBulkActions();
+    }
+    
+    // ===== ACTIONS EN MASSE =====
+    function exporterSelection() {
+        const selected = $('.student-checkbox:checked');
+        if (selected.length === 0) {
+            showToast('Veuillez sélectionner au moins un étudiant', 'warning');
+            return;
+        }
+        
+        const ids = [];
+        selected.each(function() {
+            ids.push($(this).val());
+        });
+        
+        // Créer un formulaire pour l'export
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "export_selection" %}';
+        
+        // Ajouter le token CSRF
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = getCookie('csrftoken');
+        form.appendChild(csrfToken);
+        
+        // Ajouter les IDs
+        ids.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        // Soumettre le formulaire
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+    
+    function changerStatutMasse(statut) {
+        const selected = $('.student-checkbox:checked');
+        if (selected.length === 0) {
+            showToast('Veuillez sélectionner au moins un étudiant', 'warning');
+            return;
+        }
+        
+        const ids = [];
+        selected.each(function() {
+            ids.push($(this).val());
+        });
+        
+        $.ajax({
+            url: '{% url "marquer_verifies" %}',
+            method: 'POST',
+            data: {
+                'ids[]': ids,
+                'statut': statut
+            },
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(`Statut mis à jour pour ${ids.length} étudiant(s)`, 'success');
+                    // Rafraîchir la page après 1 seconde
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showToast('Erreur lors de la mise à jour', 'error');
+                }
+            },
+            error: function() {
+                showToast('Erreur réseau', 'error');
+            }
+        });
+    }
+    
+    function supprimerSelection() {
+        const selected = $('.student-checkbox:checked');
+        if (selected.length === 0) {
+            showToast('Veuillez sélectionner au moins un étudiant', 'warning');
+            return;
+        }
+        
+        if (confirm(`Voulez-vous vraiment supprimer ${selected.length} étudiant(s) ?`)) {
+            const ids = [];
+            selected.each(function() {
+                ids.push($(this).val());
+            });
+            
+            $.ajax({
+                url: '{% url "supprimer_selection" %}',
+                method: 'POST',
+                data: {
+                    'ids[]': ids
+                },
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast(`${ids.length} étudiant(s) supprimé(s)`, 'success');
+                        // Rafraîchir la page
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showToast('Erreur lors de la suppression', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Erreur réseau', 'error');
+                }
+            });
+        }
+    }
+    
+    // ===== UTILITAIRES =====
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function showToast(message, type = 'info') {
+        // Types de Bootstrap
+        const typeClass = {
+            'success': 'bg-success',
+            'error': 'bg-danger',
+            'warning': 'bg-warning',
+            'info': 'bg-info'
+        };
+        
+        // Icônes selon le type
+        const icons = {
+            'success': 'fa-check-circle',
+            'error': 'fa-exclamation-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle'
+        };
+        
+        // Créer le toast
+        const toastId = 'toast-' + Date.now();
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white ${typeClass[type] || 'bg-info'} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${icons[type] || 'fa-info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        // Ajouter au conteneur
+        if ($('.toast-container').length === 0) {
+            $('body').append('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
+        }
+        
+        $('.toast-container').append(toastHtml);
+        
+        // Afficher le toast
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+        
+        // Nettoyer après la disparition
+        toastEl.addEventListener('hidden.bs.toast', function () {
+            $(this).remove();
+        });
+    }
+    
+    // ===== FONCTIONS FILTRES =====
+    function filtrerParStatut(statut) {
+        // Construire l'URL avec le filtre statut
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (statut) {
+            urlParams.set('statut', statut);
+        } else {
+            urlParams.delete('statut');
+        }
+        
+        // Garder les autres filtres
+        const nom = $('#searchName').val();
+        const quartier = $('#searchQuartier').val();
+        const periode = $('#searchPeriode').val();
+        
+        if (nom) urlParams.set('nom', nom);
+        if (quartier) urlParams.set('quartier', quartier);
+        if (periode) urlParams.set('periode', periode);
+        
+        // Rediriger vers la page filtrée
+        window.location.href = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    }
+    
+    function chargerFiltresDepuisURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Pré-remplir les champs depuis l'URL
+        if (urlParams.has('nom')) {
+            $('#searchName').val(urlParams.get('nom'));
+        }
+        if (urlParams.has('quartier')) {
+            $('#searchQuartier').val(urlParams.get('quartier'));
+        }
+        if (urlParams.has('statut')) {
+            $('#searchStatut').val(urlParams.get('statut'));
+        }
+        if (urlParams.has('periode')) {
+            $('#searchPeriode').val(urlParams.get('periode'));
+        }
+    }
+    
+    function afficherFiltresActifs() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const filtresActifs = [];
+    
+        // Ne pas inclure les filtres vides
+        const nom = urlParams.get('nom');
+        const quartier = urlParams.get('quartier');
+        const statut = urlParams.get('statut');
+        const periode = urlParams.get('periode');
+    
+        if (nom && nom.trim() !== '') {
+            filtresActifs.push(`Nom: "${nom}"`);
+        }
+        if (quartier && quartier.trim() !== '') {
+            filtresActifs.push(`Quartier: "${quartier}"`);
+        }
+        if (statut && statut.trim() !== '') {
+            const statutText = {
+                'BROUILLON': 'Brouillon',
+                'COMPLET': 'Complet',
+                'VERIFIE': 'Vérifié',
+                'ANOMALIE': 'Anomalie'
+            };
+            filtresActifs.push(`Statut: "${statutText[statut] || statut}"`);
+        }
+        if (periode && periode.trim() !== '') {
+            const periodeText = {
+                'today': 'Aujourd\'hui',
+                'week': '7 derniers jours',
+                'month': '30 derniers jours',
+                'quarter': '3 derniers mois'
+            };
+            filtresActifs.push(`Période: "${periodeText[periode] || periode}"`);
+        }
+    
+        // Afficher le message seulement s'il y a des filtres actifs
+        if (filtresActifs.length > 0) {
+            // Supprimer l'ancien message s'il existe
+            $('.alert-info').remove();
+        
+            const infoHtml = `
+                <div class="alert alert-info mt-3" style="animation: fadeInUp 0.5s ease;">
+                    <i class="fas fa-filter me-2"></i>
+                    <strong>Filtres actifs:</strong> ${filtresActifs.join(', ')}
+                    <a href="{% url 'etudiant_list' %}" class="float-end">
+                        <i class="fas fa-times"></i> Effacer
+                    </a>
+                </div>
+        `   ;
+            $('.search-container').after(infoHtml);
+        }
+    }       
+
+    // ===== TRI DU TABLEAU =====
+    function trierTableau(colonne) {
+        // Cette fonction peut être implémentée pour le tri côté client
+        // ou rediriger vers le serveur avec un paramètre de tri
+        showToast('Tri côté client à implémenter', 'info');
+    }
+    
+    function rafraichirListe() {
+        location.reload();
+    }
+    
+    function calculerStats() {
+        // Cette fonction calcule les statistiques côté client si nécessaire
+    }
+    
+    function supprimerEtudiant(id) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ? Toutes ses dépenses seront également supprimées.')) {
+            $.ajax({
+                url: `/etudiant/${id}/supprimer/`,
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $(`tr[data-id="${id}"]`).fadeOut(300, function() {
+                            $(this).remove();
+                            showToast('Étudiant supprimé avec succès', 'success');
+                            // Recalculer les statistiques si nécessaire
+                        });
+                    } else {
+                        showToast('Erreur lors de la suppression', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Erreur réseau', 'error');
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

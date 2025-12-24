@@ -1,0 +1,950 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Saisie des Dépenses Mensuelles - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE DÉPENSES COMPLÈTE ===== */
+    .page-header {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(30, 64, 175, 0.2);
+    }
+    
+    .student-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .student-avatar-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .student-info h3 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .student-info .badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+    }
+    
+    /* ===== CARTES DE SAISIE ===== */
+    .depense-month-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .depense-month-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .card-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .card-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 0.25rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    /* ===== GRILLE DE CATÉGORIES ===== */
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .category-item:hover {
+        background: #eff6ff;
+        border-color: #2563eb;
+        transform: translateY(-2px);
+    }
+    
+    .category-item.active {
+        background: #dbeafe;
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    }
+    
+    .category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    
+    .category-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .category-name {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .category-desc {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Champs de saisie dans les cartes */
+    .input-group-custom {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .input-with-icon {
+        position: relative;
+        flex: 1;
+    }
+    
+    .input-with-icon i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    
+    .input-with-icon input {
+        padding-left: 3rem;
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .input-with-icon input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    /* ===== SECTION DÉPENSES EXISTANTES ===== */
+    .existing-depenses-section {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .existing-depenses-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .depense-list {
+        display: grid;
+        gap: 0.75rem;
+    }
+    
+    .depense-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .depense-list-item:hover {
+        background: #f1f5f9;
+        transform: translateX(5px);
+    }
+    
+    .depense-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .depense-amount {
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        color: #059669;
+        font-size: 1.1rem;
+    }
+    
+    /* ===== SECTION TOTAL ===== */
+    .total-section {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+    }
+    
+    .total-display {
+        text-align: center;
+        color: white;
+    }
+    
+    .total-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+    
+    .total-amount {
+        font-size: 3rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .total-message {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+    
+    /* ===== BOUTONS D'ACTION ===== */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: white;
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        color: #64748b;
+    }
+    
+    /* ===== CATÉGORIES PERSONNALISÉES ===== */
+    .custom-category-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 2px dashed #cbd5e1;
+    }
+    
+    .custom-category-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .categories-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .student-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .custom-category-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .total-amount {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- En-tête avec infos étudiant -->
+<div class="page-header">
+    <div class="student-card">
+        <div class="student-avatar-large">
+            {% if etudiant.photo %}
+                <img src="{{ etudiant.photo.url }}" 
+                     alt="{{ etudiant.nom }}" 
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            {% else %}
+                <i class="fas fa-user-graduate"></i>
+            {% endif %}
+        </div>
+        <div class="student-info">
+            <h3>{{ etudiant.nom }}</h3>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-hashtag me-1"></i>{{ etudiant.code_enquete }}
+                </span>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-map-marker-alt me-1"></i>{{ etudiant.quartier }}
+                </span>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-user me-1"></i>{{ etudiant.age }} ans - {{ etudiant.get_sexe_display }}
+                </span>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-university me-1"></i>{{ etudiant.universite }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dépenses existantes -->
+{% if depenses_existantes %}
+<div class="existing-depenses-section">
+    <h4 class="existing-depenses-title">
+        <i class="fas fa-history"></i>Dépenses déjà enregistrées ({{ depenses_existantes|length }})
+    </h4>
+    <div class="depense-list">
+        {% for depense in depenses_existantes %}
+        <div class="depense-list-item">
+            <div class="depense-info">
+                {% if depense.categorie == 'LOGEMENT' %}
+                    <div class="category-icon" style="background: #3b82f6;">
+                        <i class="fas fa-home"></i>
+                    </div>
+                {% elif depense.categorie == 'NOURRITURE' %}
+                    <div class="category-icon" style="background: #10b981;">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                {% elif depense.categorie == 'TRANSPORT' %}
+                    <div class="category-icon" style="background: #f59e0b;">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                {% elif depense.categorie == 'SANTE' %}
+                    <div class="category-icon" style="background: #ef4444;">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                {% else %}
+                    <div class="category-icon" style="background: #8b5cf6;">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                {% endif %}
+                <div>
+                    <div class="fw-medium">{{ depense.get_categorie_display }}</div>
+                    <small class="text-muted">{{ depense.date_depense|date:"d/m/Y" }}</small>
+                </div>
+            </div>
+            <div class="depense-amount">{{ depense.montant|floatformat:0 }} FCFA</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Total des dépenses -->
+<div class="total-section">
+    <div class="total-display">
+        <div class="total-label">TOTAL DES DÉPENSES MENSUELLES</div>
+        <div class="total-amount" id="totalDepenses">0 FCFA</div>
+        <div class="total-message" id="totalMessage">
+            <i class="fas fa-lightbulb me-1"></i>
+            Saisissez les montants pour chaque catégorie
+        </div>
+    </div>
+</div>
+
+<!-- Formulaire principal -->
+<form method="post" id="depenseForm">
+    {% csrf_token %}
+    
+    <!-- Carte des dépenses mensuelles -->
+    <div class="depense-month-card">
+        <div class="card-header">
+            <div>
+                <h4 class="card-title">
+                    <i class="fas fa-calendar-alt"></i>Dépenses du mois
+                </h4>
+                <div class="card-subtitle">
+                    Saisissez les montants pour chaque catégorie de dépense
+                </div>
+            </div>
+            <div class="text-white">
+                <i class="fas fa-info-circle me-1"></i>
+                <small>Les montants sont en FCFA</small>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Grille des catégories principales -->
+            <div class="categories-grid" id="categoriesGrid">
+                <!-- LOGEMENT -->
+                <div class="category-item" data-category="LOGEMENT">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #3b82f6;">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 15 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Logement</div>
+                    <div class="category-desc">Loyer, charges, électricité...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="LOGEMENT"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="LOGEMENT">
+                    </div>
+                </div>
+                
+                <!-- NOURRITURE -->
+                <div class="category-item" data-category="NOURRITURE">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #10b981;">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 12 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Nourriture</div>
+                    <div class="category-desc">Courses, restaurants, cantine...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="NOURRITURE"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="NOURRITURE">
+                    </div>
+                </div>
+                
+                <!-- TRANSPORT -->
+                <div class="category-item" data-category="TRANSPORT">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #f59e0b;">
+                            <i class="fas fa-bus"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 8 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Transport</div>
+                    <div class="category-desc">Bus, taxi, essence, réparations...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="TRANSPORT"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="TRANSPORT">
+                    </div>
+                </div>
+                
+                <!-- SANTÉ -->
+                <div class="category-item" data-category="SANTE">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #ef4444;">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 5 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Santé</div>
+                    <div class="category-desc">Médecin, médicaments, mutuelle...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="SANTE"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="SANTE">
+                    </div>
+                </div>
+                
+                <!-- ÉDUCATION -->
+                <div class="category-item" data-category="EDUCATION">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #8b5cf6;">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 10 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Éducation</div>
+                    <div class="category-desc">Frais scolaires, livres, formation...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="EDUCATION"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="EDUCATION">
+                    </div>
+                </div>
+                
+                <!-- COMMUNICATION -->
+                <div class="category-item" data-category="COMMUNICATION">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #6366f1;">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 5 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Communication</div>
+                    <div class="category-desc">Téléphone, internet, forfait...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="COMMUNICATION"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="COMMUNICATION">
+                    </div>
+                </div>
+                
+                <!-- HABILLEMENT -->
+                <div class="category-item" data-category="HABILLEMENT">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #14b8a6;">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 6 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Habillement</div>
+                    <div class="category-desc">Vêtements, chaussures, entretien...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="HABILLEMENT"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="HABILLEMENT">
+                    </div>
+                </div>
+                
+                <!-- LOISIRS -->
+                <div class="category-item" data-category="LOISIRS">
+                    <div class="category-header">
+                        <div class="category-icon" style="background: #ec4899;">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-dark">Recommandé: 4 000 FCFA</span>
+                        </div>
+                    </div>
+                    <div class="category-name">Loisirs</div>
+                    <div class="category-desc">Cinéma, sport, sorties, abonnements...</div>
+                    <div class="input-group-custom">
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" 
+                                   name="montant[]" 
+                                   class="montant-input" 
+                                   data-category="LOISIRS"
+                                   placeholder="Montant"
+                                   step="100"
+                                   oninput="calculerTotal()">
+                        </div>
+                        <input type="hidden" name="categorie[]" value="LOISIRS">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Champs supplémentaires cachés -->
+            <input type="hidden" name="quartier[]" value="{{ etudiant.quartier }}">
+            <input type="hidden" name="date_depense[]" value="{% now 'Y-m-d' %}">
+            
+            <!-- Catégories personnalisées -->
+            <div class="custom-category-section" id="customCategories">
+                <h5 class="mb-3">
+                    <i class="fas fa-plus-circle me-2"></i>Ajouter d'autres dépenses
+                </h5>
+                <div id="customCategoriesContainer">
+                    <!-- Les catégories personnalisées seront ajoutées ici -->
+                </div>
+                <button type="button" class="btn btn-outline-secondary mt-3" onclick="ajouterCategoriePersonnalisee()">
+                    <i class="fas fa-plus me-2"></i>Ajouter une autre catégorie
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Boutons d'action -->
+    <div class="action-buttons">
+        <button type="button" class="btn-secondary" onclick="window.history.back()">
+            <i class="fas fa-arrow-left me-2"></i>Retour
+        </button>
+        <button type="button" class="btn-secondary" onclick="remplirMontantsMoyens()">
+            <i class="fas fa-magic me-2"></i>Remplir avec les moyennes
+        </button>
+        <button type="submit" class="btn-save">
+            <i class="fas fa-save me-2"></i>Enregistrer toutes les dépenses
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== INITIALISATION =====
+    $(document).ready(function() {
+        // Focus sur le premier champ
+        $('.montant-input').first().focus();
+        
+        // Calculer le total initial
+        calculerTotal();
+        
+        // Activer/désactiver les cartes au clic
+        $('.category-item').click(function(e) {
+            if (!$(e.target).is('input')) {
+                $(this).toggleClass('active');
+                const input = $(this).find('.montant-input');
+                input.focus().select();
+            }
+        });
+    });
+    
+    // ===== CALCUL DU TOTAL =====
+    function calculerTotal() {
+        let total = 0;
+        let count = 0;
+        
+        // Compter les dépenses avec montant > 0
+        $('.montant-input').each(function() {
+            const montant = parseFloat($(this).val()) || 0;
+            total += montant;
+            if (montant > 0) count++;
+        });
+        
+        // Mettre à jour l'affichage
+        $('#totalDepenses').text(total.toLocaleString('fr-FR') + ' FCFA');
+        
+        // Mettre à jour le message
+        let message = '';
+        if (total === 0) {
+            message = '<i class="fas fa-lightbulb me-1"></i>Saisissez les montants pour chaque catégorie';
+        } else if (count < 3) {
+            message = `<i class="fas fa-exclamation-triangle me-1"></i>${count} dépense(s) saisie(s) - Recommandé: au moins 3`;
+        } else {
+            message = `<i class="fas fa-check-circle me-1"></i>${count} dépense(s) saisie(s) - Total mensuel estimé`;
+        }
+        
+        $('#totalMessage').html(message);
+        
+        // Changer la couleur si total élevé
+        if (total > 70000) {
+            $('#totalDepenses').css('color', '#ef4444');
+        } else if (total > 50000) {
+            $('#totalDepenses').css('color', '#f59e0b');
+        } else {
+            $('#totalDepenses').css('color', 'white');
+        }
+    }
+    
+    // ===== REMPLIR AVEC LES MOYENNES =====
+    function remplirMontantsMoyens() {
+        const moyennes = {
+            'LOGEMENT': 15000,
+            'NOURRITURE': 12000,
+            'TRANSPORT': 8000,
+            'SANTE': 5000,
+            'EDUCATION': 10000,
+            'COMMUNICATION': 5000,
+            'HABILLEMENT': 6000,
+            'LOISIRS': 4000
+        };
+        
+        $('.montant-input').each(function() {
+            const categorie = $(this).data('category');
+            if (categorie && moyennes[categorie]) {
+                $(this).val(moyennes[categorie]);
+            }
+        });
+        
+        calculerTotal();
+        showToast('Montants moyens appliqués !', 'success');
+    }
+    
+    // ===== AJOUTER CATÉGORIE PERSONNALISÉE =====
+    let customCategoryCount = 0;
+    
+    function ajouterCategoriePersonnalisee() {
+        customCategoryCount++;
+        const id = `custom_${customCategoryCount}`;
+        
+        const html = `
+            <div class="custom-category-item mb-3 p-3 border rounded" id="${id}">
+                <div class="row align-items-end">
+                    <div class="col-md-5 mb-2">
+                        <label class="form-label">Nom de la catégorie</label>
+                        <input type="text" 
+                               name="categorie[]" 
+                               class="form-control" 
+                               placeholder="Ex: Sport, Abonnement..."
+                               value="AUTRES">
+                    </div>
+                    <div class="col-md-5 mb-2">
+                        <label class="form-label">Montant (FCFA)</label>
+                        <input type="number" 
+                               name="montant[]" 
+                               class="form-control montant-input" 
+                               placeholder="0"
+                               step="100"
+                               oninput="calculerTotal()">
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <button type="button" class="btn btn-danger w-100" onclick="supprimerCategoriePersonnalisee('${id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <input type="text" 
+                               name="commentaire[]" 
+                               class="form-control" 
+                               placeholder="Description (facultatif)">
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#customCategoriesContainer').append(html);
+        
+        // Animer l'ajout
+        $(`#${id}`).hide().slideDown(300);
+        
+        // Focus sur le champ montant
+        $(`#${id} .montant-input`).focus();
+    }
+    
+    function supprimerCategoriePersonnalisee(id) {
+        $(`#${id}`).slideUp(300, function() {
+            $(this).remove();
+            calculerTotal();
+        });
+    }
+    
+    // ===== VALIDATION DU FORMULAIRE =====
+    $('#depenseForm').submit(function(e) {
+        let hasValidData = false;
+        
+        // Vérifier si au moins une dépense est saisie
+        $('.montant-input').each(function() {
+            if ($(this).val() && parseFloat($(this).val()) > 0) {
+                hasValidData = true;
+            }
+        });
+        
+        if (!hasValidData) {
+            e.preventDefault();
+            showToast('Veuillez saisir au moins une dépense', 'warning');
+            return false;
+        }
+        
+        // Compter le nombre de dépenses saisies
+        let count = 0;
+        $('.montant-input').each(function() {
+            if ($(this).val() && parseFloat($(this).val()) > 0) {
+                count++;
+            }
+        });
+        
+        if (count < 3) {
+            const confirm = window.confirm(`Vous n'avez saisi que ${count} dépense(s). Voulez-vous vraiment continuer ? (Recommandé: 3)`);
+            if (!confirm) {
+                e.preventDefault();
+                return false;
+            }
+        }
+        
+        // Désactiver le bouton pendant l'envoi
+        $('button[type="submit"]').prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...');
+        
+        return true;
+    });
+    
+    // ===== TOAST MESSAGES =====
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Animation
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Auto-remove
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

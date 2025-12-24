@@ -1,0 +1,597 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Comparaison par Quartier - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE COMPARAISON QUARTIERS ===== */
+    .comparaison-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        border-top: 4px solid;
+    }
+    
+    .stat-card.plus-cher { border-color: #ef4444; }
+    .stat-card.moins-cher { border-color: #10b981; }
+    .stat-card.moyenne { border-color: #3b82f6; }
+    .stat-card.difference { border-color: #f59e0b; }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* ===== TABLEAU DÉTAILLÉ ===== */
+    .quartier-table-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+    
+    .quartier-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .quartier-table th {
+        background: #f8fafc;
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+    
+    .quartier-table td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+    }
+    
+    .quartier-table tr:hover {
+        background: #f8fafc;
+    }
+    
+    .quartier-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .badge-cher { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .badge-moyen { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .badge-peu-cher { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    
+    /* ===== CARTES DÉTAIL QUARTIER ===== */
+    .quartier-detail-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quartier-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+    }
+    
+    .quartier-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .quartier-card.cher { border-color: #ef4444; }
+    .quartier-card.moyen { border-color: #f59e0b; }
+    .quartier-card.peu-cher { border-color: #10b981; }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .stats-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quartier-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .quartier-detail-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- En-tête -->
+<div class="comparaison-header">
+    <h1 class="mb-3">
+        <i class="fas fa-map-marked-alt me-2"></i>Comparaison par Quartier
+    </h1>
+    <p class="mb-0">Analyse détaillée des dépenses étudiantes par quartier</p>
+</div>
+
+<!-- Statistiques principales -->
+<div class="stats-cards">
+    <div class="stat-card plus-cher">
+        <div class="stat-value" id="quartierPlusCher">--</div>
+        <div class="stat-label">Quartier le plus cher</div>
+        <div class="text-muted small mt-2" id="detailPlusCher"></div>
+    </div>
+    
+    <div class="stat-card moins-cher">
+        <div class="stat-value" id="quartierMoinsCher">--</div>
+        <div class="stat-label">Quartier le moins cher</div>
+        <div class="text-muted small mt-2" id="detailMoinsCher"></div>
+    </div>
+    
+    <div class="stat-card moyenne">
+        <div class="stat-value" id="moyenneGlobale">--</div>
+        <div class="stat-label">Moyenne globale</div>
+        <div class="text-muted small mt-2">Tous quartiers confondus</div>
+    </div>
+    
+    <div class="stat-card difference">
+        <div class="stat-value" id="differenceMax">--</div>
+        <div class="stat-label">Différence max</div>
+        <div class="text-muted small mt-2">Écart cher/moins cher</div>
+    </div>
+</div>
+
+<!-- Graphique principal -->
+<div class="chart-container mb-4">
+    <div class="chart-header">
+        <h3 class="chart-title">
+            <i class="fas fa-chart-bar me-2"></i>Dépenses moyennes par quartier
+        </h3>
+        <div class="chart-actions">
+            <select class="form-select-sm" id="triQuartiers" onchange="trierQuartiers()">
+                <option value="moyenne_desc">Par moyenne (haut → bas)</option>
+                <option value="moyenne_asc">Par moyenne (bas → haut)</option>
+                <option value="etudiants_desc">Par nombre d'étudiants</option>
+                <option value="nom_asc">Par nom (A → Z)</option>
+            </select>
+            <button class="chart-btn" onclick="exporterGraphique()">
+                <i class="fas fa-download me-1"></i>PNG
+            </button>
+        </div>
+    </div>
+    <div class="chart-body">
+        <div style="height: 400px;">
+            <canvas id="chartQuartiersDetail"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Tableau détaillé -->
+<div class="quartier-table-container">
+    <div class="chart-header">
+        <h3 class="chart-title">
+            <i class="fas fa-table me-2"></i>Données détaillées par quartier
+        </h3>
+        <button class="btn btn-primary-ecotrack btn-sm" onclick="exporterTableau()">
+            <i class="fas fa-file-export me-1"></i>Exporter Excel
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="quartier-table">
+            <thead>
+                <tr>
+                    <th>Quartier</th>
+                    <th>Étudiants</th>
+                    <th>Dépenses totales</th>
+                    <th>Moyenne par dépense</th>
+                    <th>Total collecté</th>
+                    <th>Tendance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="quartierTableBody">
+                <!-- Rempli par JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Analyse -->
+<div class="chart-container">
+    <div class="chart-header">
+        <h3 class="chart-title">
+            <i class="fas fa-chart-pie me-2"></i>Répartition des étudiants par quartier
+        </h3>
+    </div>
+    <div class="chart-body">
+        <div style="height: 300px;">
+            <canvas id="chartRepartition"></canvas>
+        </div>
+    </div>
+    <div class="chart-footer">
+        <div class="row text-center">
+            <div class="col-4">
+                <small class="text-muted">
+                    <i class="fas fa-male text-primary me-1"></i>
+                    <span id="statsHommesTotal">--</span> hommes
+                </small>
+            </div>
+            <div class="col-4">
+                <small class="text-muted">
+                    <i class="fas fa-female text-danger me-1"></i>
+                    <span id="statsFemmesTotal">--</span> femmes
+                </small>
+            </div>
+            <div class="col-4">
+                <small class="text-muted">
+                    <i class="fas fa-chart-line text-info me-1"></i>
+                    Moyenne âge: <span id="moyenneAge">--</span> ans
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Boutons d'action -->
+<div class="text-center mt-4">
+    <div class="btn-group" role="group">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
+        </a>
+        <button class="btn btn-primary-ecotrack" onclick="genererRapportQuartiers()">
+            <i class="fas fa-file-pdf me-2"></i>Générer rapport complet
+        </button>
+        <button class="btn btn-success" onclick="exporterToutesDonnees()">
+            <i class="fas fa-file-excel me-2"></i>Exporter toutes les données
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Données des quartiers (à remplacer par données réelles)
+    let quartiersData = [];
+    
+    $(document).ready(function() {
+        chargerDonneesQuartiers();
+        initialiserGraphiques();
+    });
+    
+    function chargerDonneesQuartiers() {
+        // Simuler le chargement depuis l'API
+        // En réalité, on ferait une requête AJAX
+        quartiersData = [
+            {
+                nom: "Mokolo",
+                etudiants: 15,
+                depenses: 45,
+                moyenne: 28500,
+                total: 1282500,
+                hommes: 9,
+                femmes: 6,
+                age_moyen: 23.4,
+                categories: {
+                    logement: 45,
+                    nourriture: 25,
+                    transport: 15,
+                    autres: 15
+                }
+            },
+            {
+                nom: "Melen",
+                etudiants: 12,
+                depenses: 38,
+                moyenne: 24500,
+                total: 931000,
+                hommes: 7,
+                femmes: 5,
+                age_moyen: 22.8,
+                categories: {
+                    logement: 40,
+                    nourriture: 30,
+                    transport: 20,
+                    autres: 10
+                }
+            },
+            {
+                nom: "Ngoa",
+                etudiants: 8,
+                depenses: 32,
+                moyenne: 32500,
+                total: 1040000,
+                hommes: 5,
+                femmes: 3,
+                age_moyen: 24.1,
+                categories: {
+                    logement: 50,
+                    nourriture: 25,
+                    transport: 15,
+                    autres: 10
+                }
+            },
+            {
+                nom: "Briqueterie",
+                etudiants: 6,
+                depenses: 24,
+                moyenne: 19500,
+                total: 468000,
+                hommes: 4,
+                femmes: 2,
+                age_moyen: 22.3,
+                categories: {
+                    logement: 35,
+                    nourriture: 35,
+                    transport: 20,
+                    autres: 10
+                }
+            }
+        ];
+        
+        mettreAJourStats();
+        remplirTableau();
+    }
+    
+    function mettreAJourStats() {
+        if (quartiersData.length === 0) return;
+        
+        // Trier par moyenne décroissante
+        const sorted = [...quartiersData].sort((a, b) => b.moyenne - a.moyenne);
+        
+        const plusCher = sorted[0];
+        const moinsCher = sorted[sorted.length - 1];
+        
+        // Calculer les totaux
+        const totalEtudiants = quartiersData.reduce((sum, q) => sum + q.etudiants, 0);
+        const totalDepenses = quartiersData.reduce((sum, q) => sum + q.depenses, 0);
+        const totalMontant = quartiersData.reduce((sum, q) => sum + q.total, 0);
+        const moyenneGlobale = totalMontant / totalDepenses;
+        
+        // Mettre à jour l'interface
+        $('#quartierPlusCher').text(`${plusCher.nom} (${Math.round(plusCher.moyenne).toLocaleString()} FCFA)`);
+        $('#detailPlusCher').text(`${plusCher.etudiants} étud., ${plusCher.depenses} dép.`);
+        
+        $('#quartierMoinsCher').text(`${moinsCher.nom} (${Math.round(moinsCher.moyenne).toLocaleString()} FCFA)`);
+        $('#detailMoinsCher').text(`${moinsCher.etudiants} étud., ${moinsCher.depenses} dép.`);
+        
+        $('#moyenneGlobale').text(`${Math.round(moyenneGlobale).toLocaleString()} FCFA`);
+        
+        const difference = plusCher.moyenne - moinsCher.moyenne;
+        $('#differenceMax').text(`${Math.round(difference).toLocaleString()} FCFA`);
+        
+        // Statistiques démographiques
+        const totalHommes = quartiersData.reduce((sum, q) => sum + q.hommes, 0);
+        const totalFemmes = quartiersData.reduce((sum, q) => sum + q.femmes, 0);
+        const ageMoyen = quartiersData.reduce((sum, q) => sum + (q.age_moyen * q.etudiants), 0) / totalEtudiants;
+        
+        $('#statsHommesTotal').text(totalHommes);
+        $('#statsFemmesTotal').text(totalFemmes);
+        $('#moyenneAge').text(ageMoyen.toFixed(1));
+    }
+    
+    function remplirTableau() {
+        const tbody = $('#quartierTableBody');
+        tbody.empty();
+        
+        quartiersData.forEach(quartier => {
+            const pourcentageCher = (quartier.moyenne > 30000) ? 'cher' : 
+                                  (quartier.moyenne > 20000) ? 'moyen' : 'peu-cher';
+            
+            const badgeClass = `badge-${pourcentageCher}`;
+            const badgeText = (pourcentageCher === 'cher') ? 'Cher' : 
+                            (pourcentageCher === 'moyen') ? 'Moyen' : 'Abordable';
+            
+            const row = `
+                <tr>
+                    <td>
+                        <strong>${quartier.nom}</strong>
+                    </td>
+                    <td>${quartier.etudiants}</td>
+                    <td>${quartier.depenses}</td>
+                    <td>
+                        <strong>${Math.round(quartier.moyenne).toLocaleString()} FCFA</strong>
+                    </td>
+                    <td>${Math.round(quartier.total).toLocaleString()} FCFA</td>
+                    <td>
+                        <span class="quartier-badge ${badgeClass}">
+                            <i class="fas fa-${pourcentageCher === 'cher' ? 'arrow-up' : 
+                                            pourcentageCher === 'moyen' ? 'minus' : 'arrow-down'}"></i>
+                            ${badgeText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="voirDetailQuartier('${quartier.nom}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            
+            tbody.append(row);
+        });
+    }
+    
+    function initialiserGraphiques() {
+        // Graphique 1 : Barres des moyennes par quartier
+        const ctx1 = document.getElementById('chartQuartiersDetail').getContext('2d');
+        
+        const labels = quartiersData.map(q => q.nom);
+        const data = quartiersData.map(q => q.moyenne);
+        const couleurs = quartiersData.map(q => 
+            q.moyenne > 30000 ? '#ef4444' :
+            q.moyenne > 20000 ? '#f59e0b' : '#10b981'
+        );
+        
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Dépenses moyennes (FCFA)',
+                    data: data,
+                    backgroundColor: couleurs,
+                    borderColor: couleurs.map(c => c.replace('0.8', '1')),
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const quartier = quartiersData[context.dataIndex];
+                                return [
+                                    `Moyenne: ${context.parsed.y.toLocaleString()} FCFA`,
+                                    `Étudiants: ${quartier.etudiants}`,
+                                    `Dépenses: ${quartier.depenses}`,
+                                    `Total: ${quartier.total.toLocaleString()} FCFA`
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' FCFA';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Graphique 2 : Répartition par quartier (camembert)
+        const ctx2 = document.getElementById('chartRepartition').getContext('2d');
+        
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: quartiersData.map(q => q.etudiants),
+                    backgroundColor: [
+                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+                        '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const pourcentage = ((context.parsed / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} étudiants (${pourcentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // ===== FONCTIONS UTILITAIRES =====
+    function trierQuartiers() {
+        const tri = $('#triQuartiers').val();
+        
+        switch(tri) {
+            case 'moyenne_desc':
+                quartiersData.sort((a, b) => b.moyenne - a.moyenne);
+                break;
+            case 'moyenne_asc':
+                quartiersData.sort((a, b) => a.moyenne - b.moyenne);
+                break;
+            case 'etudiants_desc':
+                quartiersData.sort((a, b) => b.etudiants - a.etudiants);
+                break;
+            case 'nom_asc':
+                quartiersData.sort((a, b) => a.nom.localeCompare(b.nom));
+                break;
+        }
+        
+        remplirTableau();
+        initialiserGraphiques();
+    }
+    
+    function voirDetailQuartier(nomQuartier) {
+        alert(`Détails du quartier ${nomQuartier} - À implémenter`);
+        // Redirection vers page détail quartier
+    }
+    
+    function exporterTableau() {
+        let csv = 'Quartier;Étudiants;Dépenses;Moyenne (FCFA);Total (FCFA);Hommes;Femmes;Âge moyen\n';
+        
+        quartiersData.forEach(q => {
+            csv += `${q.nom};${q.etudiants};${q.depenses};`
+                  + `${Math.round(q.moyenne)};${Math.round(q.total)};`
+                  + `${q.hommes};${q.femmes};${q.age_moyen.toFixed(1)}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `quartiers_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    }
+    
+    function exporterGraphique() {
+        showToast('Export du graphique...', 'info');
+        // Implémenter l'export PNG
+    }
+    
+    function genererRapportQuartiers() {
+        showToast('Génération du rapport...', 'info');
+        // Implémenter le PDF
+    }
+    
+    function exporterToutesDonnees() {
+        exporterTableau();
+    }
+    
+    function showToast(message, type) {
+        // Fonction existante
+    }
+</script>
+{% endblock %}

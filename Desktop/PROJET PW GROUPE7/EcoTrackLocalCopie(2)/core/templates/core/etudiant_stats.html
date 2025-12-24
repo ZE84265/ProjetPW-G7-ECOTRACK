@@ -1,0 +1,196 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Statistiques - {{ etudiant.nom }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'etudiant_list' %}">Étudiants</a></li>
+                    <li class="breadcrumb-item"><a href="/etudiant/{{ etudiant.id }}/detail/">{{ etudiant.nom }}</a></li>
+                    <li class="breadcrumb-item active">Statistiques</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>
+                        Statistiques de {{ etudiant.nom }}
+                    </h1>
+                    <p class="text-muted mb-0">Analyse des dépenses et comportements de consommation</p>
+                </div>
+                <div>
+                    <a href="/etudiant/{{ etudiant.id }}/detail/" class="btn btn-outline-primary">
+                        <i class="fas fa-user me-2"></i>Voir fiche
+                    </a>
+                    <a href="{% url 'etudiant_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistiques principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-money-bill-wave fa-3x"></i>
+                    </div>
+                    <h2 class="card-title">{{ stats.total_depenses|default:0|floatformat:0 }} FCFA</h2>
+                    <p class="card-text text-muted">Total des dépenses</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center border-info">
+                <div class="card-body">
+                    <div class="text-info mb-3">
+                        <i class="fas fa-shopping-cart fa-3x"></i>
+                    </div>
+                    <h2 class="card-title">{{ stats.count_depenses|default:0 }}</h2>
+                    <p class="card-text text-muted">Nombre de transactions</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-calendar-day fa-3x"></i>
+                    </div>
+                    <h2 class="card-title">{{ stats.moyenne_journaliere|default:0|floatformat:0 }} FCFA</h2>
+                    <p class="card-text text-muted">Moyenne journalière</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-tags fa-3x"></i>
+                    </div>
+                    <h4 class="card-title">
+                        {% if stats.categorie_preferee %}
+                            {{ stats.categorie_preferee }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h4>
+                    <p class="card-text text-muted">Catégorie préférée</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analyse par catégorie -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition par catégorie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if categories %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Catégorie</th>
+                                        <th>Nombre</th>
+                                        <th>Montant total</th>
+                                        <th>Pourcentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cat in categories %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ cat.categorie }}
+                                            </span>
+                                        </td>
+                                        <td>{{ cat.count|default:0 }}</td>
+                                        <td>{{ cat.total|default:0|floatformat:0 }} FCFA</td>
+                                        <td>
+                                            {% if stats.total_depenses and stats.total_depenses > 0 %}
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" 
+                                                     style="width: {% widthratio cat.total stats.total_depenses 100 %}%">
+                                                    {% widthratio cat.total stats.total_depenses 100 %}%
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <span class="text-muted">0%</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune donnée de catégorie disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-map-marked-alt me-2"></i>Activité par quartier
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.quartier_frequent %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            <strong>Quartier le plus fréquenté :</strong> {{ stats.quartier_frequent }}
+                        </div>
+                    {% endif %}
+                    
+                    <h6>Dernières dépenses :</h6>
+                    {% if depenses %}
+                        <ul class="list-group">
+                            {% for depense in depenses|slice:":5" %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ depense.get_categorie_display }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ depense.lieu_precis }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary rounded-pill">{{ depense.montant }} FCFA</span>
+                                    <br>
+                                    <small class="text-muted">{{ depense.quartier }}</small>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune dépense enregistrée</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

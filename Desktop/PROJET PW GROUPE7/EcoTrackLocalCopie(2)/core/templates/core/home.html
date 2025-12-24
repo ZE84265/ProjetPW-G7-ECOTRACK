@@ -1,0 +1,997 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Accueil - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE D'ACCUEIL SPÉCIFIQUE ===== */
+    .hero-section {
+        background: linear-gradient(135deg, 
+            rgba(37, 99, 235, 0.9) 0%, 
+            rgba(29, 78, 216, 0.9) 100%),
+            url('data:image/svg+xml,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z" fill="%23ffffff" fill-opacity="0.1" fill-rule="evenodd"/></svg>');
+        color: white;
+        border-radius: 24px;
+        padding: 4rem 3rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInDown 0.8s ease;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+    
+    .hero-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 800;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .hero-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .hero-stat {
+        text-align: center;
+    }
+    
+    .hero-stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        display: block;
+        line-height: 1;
+    }
+    
+    .hero-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 0.5rem;
+    }
+    
+    /* ===== ACTIONS RAPIDES ===== */
+    .quick-actions {
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.2s;
+    }
+    
+    .section-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-title i {
+        color: #2563eb;
+    }
+    
+    .action-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+    }
+    
+    .action-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border-color: #bfdbfe;
+    }
+    
+    .action-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 1.5rem;
+        position: relative;
+    }
+    
+    .action-icon::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 20px;
+        background: inherit;
+        opacity: 0.2;
+        z-index: 1;
+    }
+    
+    .action-icon i {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .action-card:nth-child(1) .action-icon {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .action-card:nth-child(2) .action-icon {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .action-card:nth-child(3) .action-icon {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .action-card:nth-child(4) .action-icon {
+        background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+        color: white;
+    }
+    
+    .action-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.3rem;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+    }
+    
+    .action-description {
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        color: white;
+    }
+    
+    /* ===== PROGRESSION ===== */
+    .progress-section {
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.4s;
+    }
+    
+    .progress-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .progress-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-title {
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .progress-value {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #2563eb;
+    }
+    
+    .progress-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1s ease-in-out;
+    }
+    
+    .progress-fill.quartier { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .progress-fill.etudiants { background: linear-gradient(90deg, #10b981, #34d399); }
+    .progress-fill.depenses { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .progress-fill.qualite { background: linear-gradient(90deg, #7c3aed, #8b5cf6); }
+    
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    
+    /* ===== DERNIÈRES ACTIVITÉS ===== */
+    .activities-section {
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.6s;
+    }
+    
+    .activities-list {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        transition: background 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        background: #f8fafc;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .activity-icon.success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .activity-icon.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .activity-icon.info { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+    .activity-icon.danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-text {
+        margin: 0;
+        color: #374151;
+        font-weight: 500;
+    }
+    
+    .activity-time {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+    
+    /* ===== RAPPEL QUOTIDIEN ===== */
+    .daily-reminder {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        border: 1px solid #fcd34d;
+        animation: fadeInUp 0.6s ease;
+        animation-delay: 0.8s;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .daily-reminder::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f59e0b" opacity="0.2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') no-repeat;
+        background-size: contain;
+    }
+    
+    .reminder-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #92400e;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .reminder-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .reminder-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        color: #92400e;
+    }
+    
+    .reminder-item i {
+        color: #d97706;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 3rem 1.5rem;
+            border-radius: 16px;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .hero-stats {
+            gap: 1.5rem;
+            justify-content: center;
+        }
+        
+        .action-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .progress-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .activity-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+        
+        .activity-icon {
+            margin: 0 auto;
+        }
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* ===== EFFETS SPÉCIAUX ===== */
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Section Hero -->
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Bienvenue, {{ user.username }} 👋
+        </h1>
+        <p class="hero-subtitle">
+            Système participatif de suivi des coûts de vie étudiants.<br>
+            Collectez, analysez et optimisez les données économiques pour la communauté étudiante.
+        </p>
+        
+        <a href="{% url 'etudiant_create' %}" class="action-btn pulse">
+            <i class="fas fa-play-circle me-1"></i> Commencer une nouvelle enquête
+        </a>
+        
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="countEtudiants">0</span>
+                <span class="hero-stat-label">Étudiants enquêtés</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="countDepenses">0</span>
+                <span class="hero-stat-label">Dépenses collectées</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="countQuartiers">0</span>
+                <span class="hero-stat-label">Quartiers couverts</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="countAnomalies">0</span>
+                <span class="hero-stat-label">Anomalies détectées</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions Rapides -->
+<div class="quick-actions">
+    <h2 class="section-title">
+        <i class="fas fa-bolt"></i> Actions Rapides
+    </h2>
+    
+    <div class="action-cards">
+        <!-- Carte 1 : Nouvel étudiant -->
+        <div class="action-card floating" style="animation-delay: 0.1s">
+            <div class="action-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h3 class="action-title">Nouvel étudiant</h3>
+            <p class="action-description">
+                Commencez une nouvelle enquête en créant la fiche d'identification d'un étudiant.
+            </p>
+            <a href="{% url 'etudiant_create' %}" class="action-btn">
+                <i class="fas fa-plus-circle me-1"></i> Créer une fiche
+            </a>
+        </div>
+        
+        <!-- Carte 2 : Voir la liste -->
+        <div class="action-card floating" style="animation-delay: 0.2s">
+            <div class="action-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="action-title">Liste des étudiants</h3>
+            <p class="action-description">
+                Consultez et gérez tous les étudiants déjà enquêtés. Reprenez les enquêtes inachevées.
+            </p>
+            <a href="{% url 'etudiant_list' %}" class="action-btn">
+                <i class="fas fa-list me-1"></i> Voir la liste
+            </a>
+        </div>
+        
+        <!-- Carte 3 : Dashboard -->
+        <div class="action-card floating" style="animation-delay: 0.3s">
+            <div class="action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="action-title">Tableau de bord</h3>
+            <p class="action-description">
+                Analysez les données collectées avec des graphiques et statistiques avancées.
+            </p>
+            <a href="{% url 'dashboard' %}" class="action-btn">
+                <i class="fas fa-chart-bar me-1"></i> Voir les stats
+            </a>
+        </div>
+        
+        <!-- Carte 4 : Anomalies -->
+        <div class="action-card floating" style="animation-delay: 0.4s">
+            <div class="action-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="action-title">Gestion des anomalies</h3>
+            <p class="action-description">
+                Vérifiez et résolvez les problèmes détectés dans les données collectées.
+            </p>
+            <a href="{% url 'anomalies_list' %}" class="action-btn">
+                <i class="fas fa-check-circle me-1"></i> Vérifier les données
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Progression -->
+<div class="progress-section">
+    <h2 class="section-title">
+        <i class="fas fa-tasks"></i> Votre Progression
+    </h2>
+    
+    <div class="progress-cards">
+        <!-- Quartiers -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <h3 class="progress-title">
+                    <i class="fas fa-map-marker-alt text-blue-500"></i> Quartiers
+                </h3>
+                <div class="progress-value" id="quartierValue">0%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill quartier" id="quartierProgress" style="width: 0%"></div>
+            </div>
+            <div class="progress-label">
+                <span>Couverts</span>
+                <span>Objectif: 10 quartiers</span>
+            </div>
+        </div>
+        
+        <!-- Étudiants -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <h3 class="progress-title">
+                    <i class="fas fa-user-graduate text-green-500"></i> Étudiants
+                </h3>
+                <div class="progress-value" id="etudiantValue">0%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill etudiants" id="etudiantProgress" style="width: 0%"></div>
+            </div>
+            <div class="progress-label">
+                <span>Enquêtés</span>
+                <span>Objectif: 50 étudiants</span>
+            </div>
+        </div>
+        
+        <!-- Dépenses -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <h3 class="progress-title">
+                    <i class="fas fa-money-bill-wave text-yellow-500"></i> Dépenses
+                </h3>
+                <div class="progress-value" id="depenseValue">0%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill depenses" id="depenseProgress" style="width: 0%"></div>
+            </div>
+            <div class="progress-label">
+                <span>Collectées</span>
+                <span>Objectif: 500 dépenses</span>
+            </div>
+        </div>
+        
+        <!-- Qualité -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <h3 class="progress-title">
+                    <i class="fas fa-check-circle text-purple-500"></i> Qualité
+                </h3>
+                <div class="progress-value" id="qualiteValue">100%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill qualite" id="qualiteProgress" style="width: 100%"></div>
+            </div>
+            <div class="progress-label">
+                <span>Données validées</span>
+                <span>Taux d'anomalies: 0%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rappel quotidien -->
+<div class="daily-reminder">
+    <h3 class="reminder-title">
+        <i class="fas fa-bell"></i> Rappel pour aujourd'hui
+    </h3>
+    <ul class="reminder-list">
+        <li class="reminder-item">
+            <i class="fas fa-check-circle"></i>
+            <span>Compléter les enquêtes inachevées (3 restantes)</span>
+        </li>
+        <li class="reminder-item">
+            <i class="fas fa-check-circle"></i>
+            <span>Vérifier les anomalies détectées hier</span>
+        </li>
+        <li class="reminder-item">
+            <i class="fas fa-check-circle"></i>
+            <span>Enquêter dans un nouveau quartier (Briqueterie)</span>
+        </li>
+        <li class="reminder-item">
+            <i class="fas fa-check-circle"></i>
+            <span>Exporter les données pour le rapport hebdomadaire</span>
+        </li>
+    </ul>
+</div>
+
+<!-- Dernières activités -->
+<div class="activities-section">
+    <h2 class="section-title">
+        <i class="fas fa-history"></i> Dernières Activités
+    </h2>
+    
+    <div class="activities-list">
+        <!-- Activité 1 -->
+        <div class="activity-item">
+            <div class="activity-icon success">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="activity-content">
+                <p class="activity-text">
+                    <strong>Vous</strong> avez ajouté un nouvel étudiant: <strong>Jean Dupont</strong>
+                </p>
+                <div class="activity-time">Il y a 2 heures</div>
+            </div>
+        </div>
+        
+        <!-- Activité 2 -->
+        <div class="activity-item">
+            <div class="activity-icon info">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="activity-content">
+                <p class="activity-text">
+                    <strong>Marie Kong</strong>: 5 nouvelles dépenses ajoutées
+                </p>
+                <div class="activity-time">Il y a 4 heures</div>
+            </div>
+        </div>
+        
+        <!-- Activité 3 -->
+        <div class="activity-item">
+            <div class="activity-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="activity-content">
+                <p class="activity-text">
+                    Anomalie détectée: <strong>Valeur hors norme</strong> pour Paul Biya
+                </p>
+                <div class="activity-time">Hier, 16:30</div>
+            </div>
+        </div>
+        
+        <!-- Activité 4 -->
+        <div class="activity-item">
+            <div class="activity-icon success">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="activity-content">
+                <p class="activity-text">
+                    Rapport hebdomadaire généré automatiquement
+                </p>
+                <div class="activity-time">Hier, 14:15</div>
+            </div>
+        </div>
+        
+        <!-- Activité 5 -->
+        <div class="activity-item">
+            <div class="activity-icon danger">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <div class="activity-content">
+                <p class="activity-text">
+                    Synchronisation des données avec le serveur principal
+                </p>
+                <div class="activity-time">Avant-hier, 23:45</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Guide rapide -->
+<div class="alert alert-info">
+    <div class="d-flex align-items-center">
+        <div class="me-3">
+            <i class="fas fa-question-circle fa-2x"></i>
+        </div>
+        <div>
+            <h5 class="mb-1">Besoin d'aide ?</h5>
+            <p class="mb-0">
+                Consultez le <a href="#" class="alert-link">guide d'utilisation</a> ou 
+                contactez le support technique pour toute assistance.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== INITIALISATION =====
+    $(document).ready(function() {
+        // Animer les compteurs
+        animerCompteurs();
+        
+        // Animer les barres de progression
+        animerProgressions();
+        
+        // Charger les données dynamiques (simulation)
+        chargerDonneesDynamiques();
+        
+        // Initialiser les animations de flottement
+        initialiserAnimations();
+    });
+    
+    // ===== COMPTEURS ANIMÉS =====
+    function animerCompteurs() {
+        const nombres = {
+            etudiants: 42,
+            depenses: 187,
+            quartiers: 8,
+            anomalies: 3
+        };
+        
+        Object.keys(nombres).forEach((key, index) => {
+            const element = $(`#count${key.charAt(0).toUpperCase() + key.slice(1)}`);
+            const target = nombres[key];
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    clearInterval(timer);
+                    element.text(target);
+                } else {
+                    element.text(Math.floor(current));
+                }
+            }, 16);
+        });
+    }
+    
+    // ===== BARRES DE PROGRESSION =====
+    function animerProgressions() {
+        const progressions = {
+            quartier: 80,   // 8/10 quartiers
+            etudiant: 84,   // 42/50 étudiants
+            depense: 37,    // 187/500 dépenses
+            qualite: 95     // 95% de qualité
+        };
+        
+        setTimeout(() => {
+            Object.keys(progressions).forEach(key => {
+                const progress = progressions[key];
+                const bar = $(`#${key}Progress`);
+                const value = $(`#${key}Value`);
+                
+                // Animer la barre
+                bar.css('width', '0%');
+                setTimeout(() => {
+                    bar.css('width', `${progress}%`);
+                }, 300);
+                
+                // Animer le pourcentage
+                let current = 0;
+                const interval = setInterval(() => {
+                    if (current >= progress) {
+                        clearInterval(interval);
+                        value.text(`${progress}%`);
+                    } else {
+                        current++;
+                        value.text(`${current}%`);
+                    }
+                }, 20);
+            });
+        }, 500);
+    }
+    
+    // ===== DONNÉES DYNAMIQUES =====
+    function chargerDonneesDynamiques() {
+        // Simuler le chargement de données depuis l'API
+        setTimeout(() => {
+            // Mettre à jour les activités (simulation)
+            const activities = [
+                {
+                    icon: 'success',
+                    text: 'Nouveau quartier ajouté: <strong>Nkolndongo</strong>',
+                    time: 'Il y a 30 minutes'
+                },
+                {
+                    icon: 'info',
+                    text: 'Export des données pour la semaine 12',
+                    time: 'Il y a 1 heure'
+                }
+            ];
+            
+            // Ajouter dynamiquement (démo)
+            activities.forEach(activity => {
+                const activityHtml = `
+                    <div class="activity-item">
+                        <div class="activity-icon ${activity.icon}">
+                            <i class="fas fa-${activity.icon === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">${activity.text}</p>
+                            <div class="activity-time">${activity.time}</div>
+                        </div>
+                    </div>
+                `;
+                
+                $('.activities-list').prepend(activityHtml);
+            });
+            
+            // Limiter à 5 activités
+            $('.activity-item').slice(5).remove();
+        }, 1000);
+    }
+    
+    // ===== ANIMATIONS =====
+    function initialiserAnimations() {
+        // Animation des cartes d'action
+        $('.action-card').each(function(index) {
+            $(this).css('animation-delay', `${index * 0.1}s`);
+        });
+        
+        // Animation au scroll
+        $(window).on('scroll', function() {
+            $('.animate-on-scroll').each(function() {
+                const elementTop = $(this).offset().top;
+                const elementBottom = elementTop + $(this).outerHeight();
+                const viewportTop = $(window).scrollTop();
+                const viewportBottom = viewportTop + $(window).height();
+                
+                if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                    $(this).addClass('visible');
+                }
+            });
+        });
+        
+        // Initialiser l'animation au scroll
+        $(window).trigger('scroll');
+    }
+    
+    // ===== INTERACTIVITÉ =====
+    function marquerRappelComplet(index) {
+        const item = $(`.reminder-item`).eq(index);
+        item.find('i').removeClass('fa-check-circle').addClass('fa-check-double text-green-500');
+        item.css('opacity', '0.6');
+        
+        // Mettre à jour le compteur
+        const remaining = $('.reminder-item i.fa-check-circle').length;
+        if (remaining === 0) {
+            $('.reminder-title').html('<i class="fas fa-trophy"></i> Toutes les tâches sont terminées !');
+            $('.daily-reminder').css('background', 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)');
+        }
+    }
+    
+    // ===== UTILITAIRES =====
+    function rafraichirPage() {
+        showToast('Actualisation des données...', 'info');
+        
+        // Simuler un rafraîchissement
+        setTimeout(() => {
+            animerCompteurs();
+            animerProgressions();
+            chargerDonneesDynamiques();
+            showToast('Données actualisées avec succès', 'success');
+        }, 1000);
+    }
+    
+    function showToast(message, type = 'info') {
+        const toastHtml = `
+            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        $('.toast-container').remove();
+        $('body').append(`<div class="toast-container position-fixed bottom-0 end-0 p-3">${toastHtml}</div>`);
+        
+        const toastEl = $('.toast').last()[0];
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+        
+        setTimeout(() => toast.hide(), 3000);
+    }
+    
+    // Rafraîchissement automatique toutes les 30 secondes
+    setInterval(rafraichirPage, 30000);
+</script>
+{% endblock %}

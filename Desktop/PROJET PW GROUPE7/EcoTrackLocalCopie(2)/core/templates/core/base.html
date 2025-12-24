@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EcoTrack Local - ISSEA AS3{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Animate.css pour animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- CSS Personnalisé -->
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --gray-color: #6b7280;
+            --sidebar-width: 260px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+        }
+        
+        /* ===== NAVBAR PROFESSIONNELLE ===== */
+        .navbar-ecotrack {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #ffffff 0%, #e0f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            color: white !important;
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-dropdown {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 0.5rem;
+        }
+        
+        /* ===== CONTENU PRINCIPAL ===== */
+        .main-content {
+            min-height: calc(100vh - 140px);
+            padding: 2rem 0;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary-color);
+            animation: fadeInDown 0.6s ease;
+        }
+        
+        .page-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: var(--gray-color);
+            font-size: 1.1rem;
+        }
+        
+        /* ===== CARTES PROFESSIONNELLES ===== */
+        .card-ecotrack {
+            background: white;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.07);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-ecotrack:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header-ecotrack {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .card-body-ecotrack {
+            padding: 1.5rem;
+        }
+        
+        /* ===== BOUTONS ÉLÉGANTS ===== */
+        .btn-ecotrack {
+            padding: 0.75rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-ecotrack::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn-ecotrack:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        .btn-primary-ecotrack {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+        
+        .btn-primary-ecotrack:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+        
+        /* ===== FOOTER PROFESSIONNEL ===== */
+        .footer-ecotrack {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer-ecotrack::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+        }
+        
+        .footer-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #ffffff 0%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .team-member {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .team-member:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .team-role {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .copyright {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 1rem 0;
+            }
+            
+            .page-header {
+                padding: 1.2rem;
+            }
+            
+            .card-ecotrack {
+                margin-bottom: 1rem;
+            }
+            
+            .footer-ecotrack {
+                padding: 2rem 0 1rem;
+            }
+        }
+        
+        /* ===== UTILITAIRES ===== */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .shadow-soft {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .border-left-accent {
+            border-left: 4px solid var(--accent-color) !important;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Principale -->
+    <nav class="navbar navbar-expand-lg navbar-ecotrack">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand animate__animated animate__fadeInLeft" href="{% url 'dashboard' %}">
+                <i class="fas fa-chart-line me-2"></i>EcoTrack Local
+            </a>
+            
+            <!-- Burger Menu pour mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+            </button>
+            
+            <!-- Menu Navigation -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                                <i class="fas fa-home me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/etudiant/nouveau/' %}active{% endif %}" href="{% url 'etudiant_create' %}">
+                                <i class="fas fa-user-plus me-1"></i> Nouvel Étudiant
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/etudiants/' %}active{% endif %}" href="{% url 'etudiant_list' %}">
+                                <i class="fas fa-users me-1"></i> Liste Étudiants
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/anomalies/' %}active{% endif %}" href="{% url 'anomalies_list' %}">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Anomalies
+                                <span class="badge bg-danger ms-1 pulse">{% if anomalies_count %}{{ anomalies_count }}{% endif %}</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Menu Utilisateur -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle user-dropdown" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profil' %}"><i class="fas fa-user me-2"></i> Mon Profil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'parametres' %}"><i class="fas fa-cog me-2"></i> Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i> Connexion
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Messages Django (succès, erreurs, etc.) -->
+            {% if messages %}
+                <div class="row">
+                    <div class="col-12">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle me-2"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% elif message.tags == 'info' %}
+                                    <i class="fas fa-info-circle me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Bloc de contenu spécifique à chaque page -->
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer Professionnel -->
+    <footer class="footer-ecotrack">
+        <div class="container">
+            <div class="row">
+                <!-- Colonne 1 : À propos -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h3 class="footer-title">EcoTrack Local</h3>
+                    <p class="text-light mb-3">
+                        Système participatif de suivi des coûts de vie étudiants. 
+                        Application développée pour l'ISSEA dans le cadre du projet AS3 2025.
+                    </p>
+                    <div class="d-flex">
+                        <a href="#" class="btn btn-sm btn-outline-light me-2">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-light me-2">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-light">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Colonne 2 : Équipe -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h4 class="text-white mb-3">Notre Équipe</h4>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="team-member">
+                                <h6 class="text-white mb-1">MBOKOP MWAMEN Manuelle</h6>
+                                <p class="team-role">Cheffe de groupe</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="team-member">
+                                <h6 class="text-white mb-1">LONKOK DEKOU Edith</h6>
+                                <p class="team-role">Analyste de données</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="team-member">
+                                <h6 class="text-white mb-1">ZE II Jonathan Patrick</h6>
+                                <p class="team-role">Développeur principal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Colonne 3 : Contact -->
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h4 class="text-white mb-3">Coordination</h4>
+                    <div class="team-member">
+                        <h6 class="text-white mb-1">Dr HAMZA</h6>
+                        <p class="team-role">Enseignant à l'ISSEA</p>
+                        <p class="text-light small mb-0">Coordinateur du projet</p>
+                    </div>
+                    
+                    <h4 class="text-white mt-4 mb-3">Liens Utiles</h4>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-chevron-right me-2"></i> Documentation</a>
+                        <a href="#"><i class="fas fa-chevron-right me-2"></i> Guide d'utilisation</a>
+                        <a href="#"><i class="fas fa-chevron-right me-2"></i> Rapport technique</a>
+                        <a href="#"><i class="fas fa-chevron-right me-2"></i> Support</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-md-start text-center mb-2">
+                        &copy; 2025 <strong class="text-gradient">EcoTrack Local</strong>. Tous droits réservés.
+                    </div>
+                    <div class="col-md-6 text-md-end text-center">
+                        <span class="text-light">ISSEA - AS3 - Institut Sous-régional de Statistique et d'Economie Appliquée</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- Script pour animations au scroll -->
+    <script>
+        $(document).ready(function() {
+            // Animation au scroll
+            function animateOnScroll() {
+                $('.animate-on-scroll').each(function() {
+                    var elementTop = $(this).offset().top;
+                    var elementBottom = elementTop + $(this).outerHeight();
+                    var viewportTop = $(window).scrollTop();
+                    var viewportBottom = viewportTop + $(window).height();
+                    
+                    if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                        $(this).addClass('visible');
+                    }
+                });
+            }
+            
+            // Initialisation
+            animateOnScroll();
+            
+            // Écouteur d'événement scroll
+            $(window).on('scroll', animateOnScroll);
+            
+            // Animation des alertes
+            $('.alert').delay(5000).fadeOut('slow');
+            
+            // Effet de pulse pour les badges
+            setInterval(function() {
+                $('.pulse').toggleClass('animate__pulse');
+            }, 2000);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

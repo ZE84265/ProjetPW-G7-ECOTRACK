@@ -1,0 +1,1676 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== LÉGENDE PERSONNALISÉE ===== */
+.chart-legend {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    background: #e2e8f0;
+    transform: translateX(5px);
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legend-text {
+    flex: 1;
+}
+
+.legend-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1f2937;
+}
+
+.legend-value {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* ===== RESPONSIVE LÉGENDE ===== */
+@media (max-width: 768px) {
+    .legend-item {
+        padding: 0.5rem;
+    }
+    
+    .legend-label {
+        font-size: 0.85rem;
+    }
+    
+    .legend-value {
+        font-size: 0.75rem;
+    }
+}
+
+/* ===== CARTES DE GRAPHIQUES MODERNES ===== */
+.modern-chart-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.modern-chart-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* En-tête */
+.chart-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.chart-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.chart-icon.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.chart-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.chart-badge .badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Corps du graphique */
+.chart-body {
+    padding: 1.5rem;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-image {
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.chart-image:hover {
+    transform: scale(1.02);
+}
+
+/* Pied de graphique */
+.chart-footer {
+    background: #f8fafc;
+    padding: 1.2rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.chart-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    font-family: 'Poppins', sans-serif;
+}
+
+.stat-value.text-success {
+    color: #10b981;
+}
+
+/* Placeholder quand pas de données */
+.no-data-placeholder {
+    text-align: center;
+    color: #94a3b8;
+    padding: 3rem 1rem;
+}
+
+.no-data-placeholder i {
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chart-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .chart-title-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .chart-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .chart-body {
+        min-height: 250px;
+    }
+}  
+  
+/* ===== CARTES DE STATISTIQUES AMÉLIORÉES ===== */
+.stats-card-wrapper {
+    height: 100%;
+}
+
+.stats-card-enhanced {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card-enhanced:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+    border-radius: 0 0 0 100%;
+    z-index: 0;
+}
+
+.stats-card-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    z-index: 1;
+}
+
+.stats-card-primary .stats-card-badge {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.2) 100%);
+    color: #2563eb;
+    border: 2px solid rgba(37, 99, 235, 0.3);
+}
+
+.stats-card-success .stats-card-badge {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.2) 100%);
+    color: #10b981;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.stats-card-warning .stats-card-badge {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%);
+    color: #f59e0b;
+    border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.stats-card-info .stats-card-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.2) 100%);
+    color: #3b82f6;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.stats-card-content {
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.stats-main {
+    margin-bottom: 1.5rem;
+}
+
+.stats-number {
+    font-size: 2.8rem;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stats-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.stats-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.trend-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.trend-indicator i {
+    font-size: 0.8rem;
+}
+
+.trend-up {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.trend-down {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.trend-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.trend-text {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.stats-card-footer {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
+    margin-top: auto;
+}
+
+.progress {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    height: 100%;
+    border-radius: 3px;
+}
+
+.amount-total {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.amount-total i {
+    color: #f59e0b;
+}
+
+.anomaly-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.anomaly-status .badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.view-link {
+    font-size: 0.85rem;
+    color: #3b82f6;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.view-link:hover {
+    color: #2563eb;
+    transform: translateX(3px);
+}
+
+.coverage-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coverage-visual {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.coverage-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.coverage-dot.active {
+    background: #3b82f6;
+}
+
+.coverage-dot.inactive {
+    background: #e2e8f0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .stats-number {
+        font-size: 2.5rem;
+    }
+    
+    .stats-card-badge {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-card-enhanced {
+        padding: 1.25rem;
+    }
+    
+    .stats-number {
+        font-size: 2.2rem;
+    }
+    
+    .stats-trend {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* ===== FILTRES ===== */
+.filters-container {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    color: #1f2937;
+    font-size: 0.95rem;
+    min-width: 140px;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.filter-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.filter-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.2);
+}
+
+.filter-btn-secondary {
+    background: #f8fafc;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+}
+
+.filter-btn-secondary:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+/* ===== CONTENEURS DE GRAPHIQUES ===== */
+.chart-container {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.07);
+    transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.chart-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.chart-btn {
+    padding: 0.4rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.chart-btn:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+.chart-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.chart-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+}
+
+.chart-btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.chart-btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
+}
+
+.chart-btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.chart-btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+}
+
+.chart-body {
+    padding: 1rem 0;
+}
+
+/* ===== BOUTONS D'EXPORT ===== */
+.export-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.export-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    justify-content: center;
+}
+
+.export-btn-pdf {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.export-btn-pdf:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.2);
+}
+
+.export-btn-csv {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.export-btn-csv:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.2);
+}
+
+.export-btn-excel {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+}
+
+.export-btn-excel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.2);
+}
+
+/* ===== BADGES ET INDICATEURS ===== */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filter-buttons {
+        margin-left: 0;
+        justify-content: center;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .chart-actions {
+        align-self: stretch;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    
+    .export-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .export-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-on-scroll {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+}
+
+/* Délais d'animation */
+.animate-on-scroll:nth-child(1) { animation-delay: 0.1s; }
+.animate-on-scroll:nth-child(2) { animation-delay: 0.2s; }
+.animate-on-scroll:nth-child(3) { animation-delay: 0.3s; }
+.animate-on-scroll:nth-child(4) { animation-delay: 0.4s; }
+
+    /* ===== COMPARAISON AVANCÉE ===== */
+.comparison-controls {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.quartier-badge {
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.quartier-badge.quartier-1 {
+    background: rgba(37, 99, 235, 0.1);
+    border: 2px solid rgba(37, 99, 235, 0.3);
+}
+
+.quartier-badge.quartier-2 {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.comparison-badge {
+    padding: 1rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 2px dashed rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-value-large {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    margin: 0.5rem 0;
+}
+
+.diff-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.diff-percent {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #10b981;
+}
+
+.analysis-text {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #3b82f6;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.stats-details {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.stats-details .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.stats-details .detail-item:last-child {
+    border-bottom: none;
+}
+
+.stats-details .detail-label {
+    color: #64748b;
+}
+
+.stats-details .detail-value {
+    font-weight: 600;
+    color: #1f2937;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- En-tête du Dashboard -->
+<div class="dashboard-header">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-chart-line me-2"></i>Tableau de Bord
+        </h1>
+        <p class="page-subtitle">
+            Statistiques et analyses des données collectées - {% now "d F Y" %}
+        </p>
+    </div>
+</div>
+
+<!-- Statistiques Principales -->
+<div class="row mb-4">
+    <!-- Étudiants enquêtés -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card-wrapper animate-on-scroll">
+            <div class="stats-card-enhanced stats-card-primary">
+                <div class="stats-card-badge">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-main">
+                        <div class="stats-number">{{ total_etudiants }}</div>
+                        <div class="stats-label">Étudiants enquêtés</div>
+                    </div>
+                    <div class="stats-trend">
+                        <div class="trend-indicator trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+5%</span>
+                        </div>
+                        <div class="trend-text">vs hier</div>
+                    </div>
+                </div>
+                <div class="stats-card-footer">
+                    <div class="progress progress-sm">
+                        <div class="progress-bar" style="width: 85%"></div>
+                    </div>
+                    <small>Objectif: 45 étudiants</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dépenses collectées -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card-wrapper animate-on-scroll" style="animation-delay: 0.1s">
+            <div class="stats-card-enhanced stats-card-success">
+                <div class="stats-card-badge">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-main">
+                        <div class="stats-number">{{ total_depenses }}</div>
+                        <div class="stats-label">Dépenses collectées</div>
+                    </div>
+                    <div class="stats-trend">
+                        <div class="trend-value">{{ moyenne_generale|floatformat:0 }} FCFA</div>
+                        <div class="trend-text">Moyenne par dépense</div>
+                    </div>
+                </div>
+                <div class="stats-card-footer">
+                    <div class="amount-total">
+                        <i class="fas fa-coins"></i>
+                        <span>Total: {{ montant_total|floatformat:0 }} FCFA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Anomalies détectées -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card-wrapper animate-on-scroll" style="animation-delay: 0.2s">
+            <div class="stats-card-enhanced stats-card-warning">
+                <div class="stats-card-badge">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-main">
+                        <div class="stats-number">{{ anomalies }}</div>
+                        <div class="stats-label">Anomalies détectées</div>
+                    </div>
+                    <div class="stats-trend">
+                        <div class="trend-indicator {{ anomalies|yesno:'trend-up,trend-down' }}">
+                            <i class="fas fa-{{ anomalies|yesno:'arrow-up,arrow-down' }}"></i>
+                            <span>{{ anomalies|yesno:'+,-' }}{{ anomalies }}</span>
+                        </div>
+                        <div class="trend-text">en attente de traitement</div>
+                    </div>
+                </div>
+                <div class="stats-card-footer">
+                    <div class="anomaly-status">
+                        <span class="badge bg-warning">
+                            <i class="fas fa-clock"></i> En attente
+                        </span>
+                        <a href="{% url 'anomalies_list' %}" class="view-link">
+                            Voir détails <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quartiers couverts -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card-wrapper animate-on-scroll" style="animation-delay: 0.3s">
+            <div class="stats-card-enhanced stats-card-info">
+                <div class="stats-card-badge">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-main">
+                        <div class="stats-number" id="quartiersCount">{{ quartiers_count|default:"0" }}</div>
+                        <div class="stats-label">Quartiers couverts</div>
+                    </div>
+                    <div class="stats-trend">
+                        <div class="trend-indicator trend-up">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            <span id="couvertureQuartiers">{{ quartiers_count|default:"0" }}0%</span>
+                        </div>
+                        <div class="trend-text">couverture totale</div>
+                    </div>
+                </div>
+                <div class="stats-card-footer">
+                    <div class="coverage-info">
+                        <div class="coverage-visual">
+                            {% for i in "12345"|make_list %}
+                                <div class="coverage-dot {{ forloop.counter|divisibleby:2|yesno:'active,inactive' }}"></div>
+                            {% endfor %}
+                        </div>
+                        <small>Objectif: 10 quartiers</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Première Ligne de Graphiques -->
+<div class="row mb-4">
+    <!-- Graphique 1 : Répartition par quartier INTERACTIF -->
+    <div class="col-lg-6 mb-4">
+        <div class="modern-chart-card">
+            <div class="chart-header">
+                <div class="chart-title-section">
+                    <div class="chart-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3 class="chart-title">Répartition par quartier</h3>
+                    <div class="chart-badge">
+                        <span class="badge bg-info" id="quartierCountBadge">{{ quartiers_count }} quartiers</span>
+                    </div>
+                </div>
+                <div class="chart-actions">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="changeChartType('bar')">
+                                <i class="fas fa-chart-bar me-2"></i>Barres
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeChartType('line')">
+                                <i class="fas fa-chart-line me-2"></i>Lignes
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeChartType('pie')">
+                                <i class="fas fa-chart-pie me-2"></i>Camembert
+                            </a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-sm btn-outline-success ms-2" onclick="downloadChart('quartierChart')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+        
+            <div class="chart-body">
+                <div style="height: 280px;">
+                    <canvas id="quartierChart"></canvas>
+                </div>
+            </div>
+        
+            <div class="chart-footer">
+                <div class="chart-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total étudiants</span>
+                        <span class="stat-value">{{ total_etudiants }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ratio H/F</span>
+                        <span class="stat-value">{{ hommes_count }}:{{ femmes_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique 2 : Dépenses par catégorie INTERACTIF -->
+    <div class="col-lg-6 mb-4">
+        <div class="modern-chart-card">
+            <div class="chart-header">
+                <div class="chart-title-section">
+                    <div class="chart-icon bg-success">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="chart-title">Dépenses par catégorie</h3>
+                    <div class="chart-badge">
+                        <span class="badge bg-success">{{ total_depenses }} dépenses</span>
+                    </div>
+                </div>
+                <div class="chart-actions">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="toggleDonut()">
+                            <i class="fas fa-donut"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="downloadChart('categorieChart')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="showLegend()">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="chart-body">
+                <div class="row">
+                    <div class="col-md-8" style="height: 280px;">
+                        <canvas id="categorieChart"></canvas>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="legend-container" id="legendContainer"></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="chart-footer">
+                <div class="chart-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Montant total</span>
+                        <span class="stat-value text-success">{{ montant_total|floatformat:0 }} FCFA</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Moyenne</span>
+                        <span class="stat-value">{{ moyenne_generale|floatformat:0 }} FCFA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Deuxième Ligne : Analyse détaillée -->
+<!-- ===== COMPARAISON AVANCÉE PAR QUARTIER ===== -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="chart-container animate-on-scroll" style="animation-delay: 0.6s">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-balance-scale me-2"></i>Comparaison Avancée : Quartier vs Quartier
+                </h3>
+                <div class="chart-actions">
+                    <button class="btn btn-primary-ecotrack btn-sm" onclick="appliquerComparaison()">
+                        <i class="fas fa-play me-1"></i>Comparer
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="exporterComparaison()">
+                        <i class="fas fa-download me-1"></i>Exporter
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contrôles de comparaison SIMPLES -->
+            <div class="comparison-controls mb-4">
+                <div class="row g-3 align-items-end">
+                    <!-- Quartier 1 -->
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>Quartier 1
+                        </label>
+                        <select class="form-select" id="quartier1Select">
+                            <option value="">-- Choisir --</option>
+                            {% for quartier in quartiers_list %}
+                                <option value="{{ quartier }}">{{ quartier }}</option>
+                            {% empty %}
+                                <option disabled>Aucun quartier</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Quartier 2 -->
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>Quartier 2
+                        </label>
+                        <select class="form-select" id="quartier2Select">
+                            <option value="">-- Choisir --</option>
+                            {% for quartier in quartiers_list %}
+                                <option value="{{ quartier }}">{{ quartier }}</option>
+                            {% empty %}
+                                <option disabled>Aucun quartier</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Type de dépenses -->
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="fas fa-tags text-success me-2"></i>Type de dépenses
+                        </label>
+                        <select class="form-select" id="categorieSelect">
+                            <option value="TOUTES">Toutes les dépenses</option>
+                            <option value="LOGEMENT">Logement</option>
+                            <option value="NOURRITURE">Nourriture</option>
+                            <option value="TRANSPORT">Transport</option>
+                            <option value="SANTE">Santé</option>
+                            <option value="LOISIRS">Loisirs</option>
+                            <option value="AUTRES">Autres</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Bouton -->
+                    <div class="col-md-2">
+                        <button class="btn btn-primary-ecotrack w-100" onclick="appliquerComparaison()">
+                            <i class="fas fa-chart-bar me-1"></i>Comparer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Résultats de comparaison -->
+            <div class="comparison-results">
+                <!-- Message d'instruction -->
+                <div class="alert alert-light mb-4" id="instructionMessage">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle text-info fa-2x me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Comment utiliser cet outil ?</h6>
+                            <p class="mb-0 small">
+                                1. Sélectionnez deux quartiers différents<br>
+                                2. Choisissez un type de dépenses (ou "Toutes")<br>
+                                3. Cliquez sur "Comparer" pour analyser les différences
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graphique comparatif -->
+                <div class="chart-body" id="chartContainer" style="display: none;">
+                    <div style="height: 250px;">
+                        <canvas id="chartComparison"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Analyse textuelle -->
+                <div class="analysis-card mt-4" id="analysisCard" style="display: none;">
+                    <div class="card-ecotrack">
+                        <div class="card-header-ecotrack">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Analyse comparative
+                            </h5>
+                        </div>
+                        <div class="card-body-ecotrack">
+                            <div class="row align-items-center mb-4">
+                                <div class="col-md-4 text-center">
+                                    <div class="quartier-badge quartier-1">
+                                        <h4 id="quartier1Name">--</h4>
+                                        <div class="stat-value-large" id="moyenneQuartier1">0 FCFA</div>
+                                        <small>Moyenne</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="comparison-badge">
+                                        <div class="diff-value" id="differenceValue">0 FCFA</div>
+                                        <div class="diff-percent" id="differencePercent">0%</div>
+                                        <small>Différence</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="quartier-badge quartier-2">
+                                        <h4 id="quartier2Name">--</h4>
+                                        <div class="stat-value-large" id="moyenneQuartier2">0 FCFA</div>
+                                        <small>Moyenne</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Texte d'analyse -->
+                            <div class="analysis-text" id="analysisText">
+                                <!-- Texte généré dynamiquement -->
+                            </div>
+                            
+                            <!-- Détails statistiques -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Détails Quartier 1</h6>
+                                    <div class="stats-details" id="detailsQuartier1">
+                                        <!-- Rempli dynamiquement -->
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Détails Quartier 2</h6>
+                                    <div class="stats-details" id="detailsQuartier2">
+                                        <!-- Rempli dynamiquement -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Anomalies Récentes -->
+<div class="row">
+    <div class="col-12">
+        <div class="chart-container animate-on-scroll" style="animation-delay: 0.4s">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-exclamation-circle me-2"></i>Anomalies récentes
+                </h3>
+                <a href="{% url 'anomalies_list' %}" class="btn btn-sm btn-primary-ecotrack">
+                    <i class="fas fa-list me-1"></i>Voir toutes
+                </a>
+            </div>
+            <div class="chart-body">
+                {% if dernieres_anomalies %}
+                    <div class="table-responsive">
+                        <table class="anomalies-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Étudiant</th>
+                                    <th>Gravité</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for anomalie in dernieres_anomalies %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ anomalie.get_type_anomalie_display|slice:":15" }}
+                                        </span>
+                                    </td>
+                                    <td>{{ anomalie.description|truncatechars:50 }}</td>
+                                    <td>
+                                        {% if anomalie.etudiant %}
+                                            {{ anomalie.etudiant.nom }}
+                                        {% else %}
+                                            Dépense
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if anomalie.gravite == 'FAIBLE' %}
+                                            <span class="badge-anomalie badge-faible">Faible</span>
+                                        {% elif anomalie.gravite == 'MOYENNE' %}
+                                            <span class="badge-anomalie badge-moyenne">Moyenne</span>
+                                        {% else %}
+                                            <span class="badge-anomalie badge-elevee">Élevée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ anomalie.date_detection|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="resoudreAnomalie({{ anomalie.id }})">
+                                            <i class="fas fa-check me-1"></i>Résoudre
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h5 class="text-muted">Aucune anomalie détectée</h5>
+                        <p class="text-muted">Toutes les données semblent cohérentes.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Actions Rapides -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card-ecotrack">
+            <div class="card-body-ecotrack">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-1">
+                            <i class="fas fa-bolt me-2 text-warning"></i>Actions rapides
+                        </h5>
+                        <p class="text-muted mb-0">
+                            Effectuez des actions courantes directement depuis le dashboard
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'etudiant_create' %}" class="btn btn-primary-ecotrack">
+                                <i class="fas fa-user-plus me-1"></i>Nouvel étudiant
+                            </a>
+                            <a href="{% url 'anomalies_list' %}" class="btn btn-outline-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Anomalies
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// ===== VARIABLES GLOBALES =====
+let quartierChart = null;
+let categorieChart = null;
+
+// ===== INITIALISATION =====
+$(document).ready(function() {
+    console.log('Dashboard initialisé');
+    console.log('Données quartier:', {{ quartier_labels_json|safe }}, {{ quartier_values_json|safe }});
+    console.log('Données catégories:', {{ categorie_labels_json|safe }}, {{ categorie_values_json|safe }});
+    
+    // Initialiser les graphiques
+    initQuartierChart();
+    initCategorieChart();
+});
+
+// ===== GRAPHIQUE QUARTIER =====
+function initQuartierChart() {
+    console.log('Initialisation graphique quartier...');
+    
+    const ctx = document.getElementById('quartierChart');
+    if (!ctx) {
+        console.error('Élément #quartierChart non trouvé!');
+        return;
+    }
+    
+    // Récupérer les données depuis Django
+    const labels = {{ quartier_labels_json|safe }};
+    const data = {{ quartier_values_json|safe }};
+    
+    console.log('Labels quartier:', labels);
+    console.log('Données quartier:', data);
+    
+    // Si pas de données, afficher message
+    if (labels.length === 0 || data.length === 0) {
+        ctx.parentElement.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune donnée disponible</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Créer un dégradé de couleurs
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+    
+    quartierChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Nombre d\'étudiants',
+                data: data,
+                backgroundColor: gradient,
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                hoverBackgroundColor: 'rgba(59, 130, 246, 0.9)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Étudiants: ${context.parsed.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nombre d\'étudiants'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('Graphique quartier créé avec succès');
+}
+
+// ===== GRAPHIQUE CATÉGORIES =====
+function initCategorieChart() {
+    console.log('Initialisation graphique catégories...');
+    
+    const ctx = document.getElementById('categorieChart');
+    if (!ctx) {
+        console.error('Élément #categorieChart non trouvé!');
+        return;
+    }
+    
+    const labels = {{ categorie_labels_json|safe }};
+    const data = {{ categorie_values_json|safe }};
+    const colors = {{ categorie_couleurs_json|safe }};
+    
+    console.log('Labels catégories:', labels);
+    console.log('Données catégories:', data);
+    
+    // Si pas de données
+    if (labels.length === 0 || data.length === 0) {
+        ctx.parentElement.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune dépense enregistrée</p>
+            </div>
+        `;
+        return;
+    }
+    
+    categorieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderColor: 'white',
+                borderWidth: 3,
+                hoverOffset: 20
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${context.label}: ${formatMoney(value)} FCFA (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Générer la légende
+    updateLegend();
+    console.log('Graphique catégories créé avec succès');
+}
+
+// ===== LÉGENDE =====
+function updateLegend() {
+    if (!categorieChart) return;
+    
+    const labels = categorieChart.data.labels;
+    const colors = categorieChart.data.datasets[0].backgroundColor;
+    const data = categorieChart.data.datasets[0].data;
+    
+    let html = '<div class="chart-legend">';
+    let total = data.reduce((a, b) => a + b, 0);
+    
+    labels.forEach((label, index) => {
+        const value = data[index];
+        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+        
+        html += `
+            <div class="legend-item" onclick="highlightSlice(${index})">
+                <div class="legend-color" style="background-color: ${colors[index]}"></div>
+                <div class="legend-text">
+                    <div class="legend-label">${label}</div>
+                    <div class="legend-value">${formatMoney(value)} FCFA (${percentage}%)</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    const container = document.getElementById('legendContainer');
+    if (container) {
+        container.innerHTML = html;
+    }
+}
+
+// ===== FONCTIONS UTILITAIRES =====
+function formatMoney(amount) {
+    return Math.round(amount).toLocaleString('fr-FR');
+}
+
+function highlightSlice(index) {
+    if (!categorieChart) return;
+    
+    const meta = categorieChart.getDatasetMeta(0);
+    const element = meta.data[index];
+    
+    // Animation simple
+    element.options.offset = 30;
+    categorieChart.update();
+    
+    setTimeout(() => {
+        element.options.offset = 20;
+        categorieChart.update();
+    }, 500);
+}
+
+function showToast(message, type = 'info') {
+    // Ta fonction toast existante
+    alert(message); // Temporaire
+}
+</script>
+{% endblock %}

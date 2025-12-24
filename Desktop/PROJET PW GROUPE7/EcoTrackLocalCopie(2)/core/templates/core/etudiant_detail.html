@@ -1,0 +1,303 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détails de l'Étudiant - {{ etudiant.nom }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'etudiant_list' %}">Étudiants</a></li>
+                    <li class="breadcrumb-item active">{{ etudiant.nom }}</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-user-graduate text-primary me-2"></i>
+                        {{ etudiant.nom }}
+                    </h1>
+                    <p class="text-muted mb-0">{{ etudiant.code_enquete }}</p>
+                </div>
+                <div>
+                    <a href="/etudiant/{{ etudiant.id }}/modifier/" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                    <a href="{% url 'depense_create' etudiant.id %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Ajouter dépense
+                    </a>
+                    <a href="{% url 'etudiant_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cartes de statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Total dépenses</h6>
+                            <h3 class="card-title text-success">{{ total_depenses|default:0|floatformat:0 }} FCFA</h3>
+                        </div>
+                        <div class="bg-primary text-white rounded-circle p-3">
+                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Nombre de dépenses</h6>
+                            <h3 class="card-title text-info">{{ depenses.count }}</h3>
+                        </div>
+                        <div class="bg-info text-white rounded-circle p-3">
+                            <i class="fas fa-receipt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Âge</h6>
+                            <h3 class="card-title text-warning">{{ etudiant.age }} ans</h3>
+                        </div>
+                        <div class="bg-warning text-white rounded-circle p-3">
+                            <i class="fas fa-birthday-cake fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-secondary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle text-muted">Date enquête</h6>
+                            <h5 class="card-title text-secondary">{{ etudiant.date_collecte|date:"d/m/Y" }}</h5>
+                        </div>
+                        <div class="bg-secondary text-white rounded-circle p-3">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informations détaillées -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-id-card me-2"></i>Informations personnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if etudiant.photo %}
+                            <img src="{{ etudiant.photo.url }}" 
+                                 alt="{{ etudiant.nom }}" 
+                                 class="rounded-circle img-fluid mb-3" 
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style="width: 150px; height: 150px; font-size: 3rem; color: white;">
+                                {{ etudiant.nom|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <table class="table table-sm">
+                        <tr>
+                            <th width="40%">Nom complet</th>
+                            <td>{{ etudiant.nom }}</td>
+                        </tr>
+                        <tr>
+                            <th>Âge</th>
+                            <td>{{ etudiant.age }} ans</td>
+                        </tr>
+                        <tr>
+                            <th>Sexe</th>
+                            <td>{{ etudiant.get_sexe_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Niveau</th>
+                            <td>{{ etudiant.get_niveau_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Université</th>
+                            <td>{{ etudiant.universite }}</td>
+                        </tr>
+                        <tr>
+                            <th>Quartier</th>
+                            <td>
+                                <span class="badge bg-secondary">{{ etudiant.quartier }}</span>
+                            </td>
+                        </tr>
+                        {% if etudiant.gps_lat and etudiant.gps_lng %}
+                        <tr>
+                            <th>Coordonnées GPS</th>
+                            <td>
+                                <small>{{ etudiant.gps_lat }}, {{ etudiant.gps_lng }}</small>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Liste des dépenses -->
+            <div class="card mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-receipt me-2"></i>Dépenses enregistrées
+                    </h5>
+                    <a href="{% url 'depense_create' etudiant.id %}" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus me-1"></i>Nouvelle dépense
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if depenses %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Catégorie</th>
+                                        <th>Montant (FCFA)</th>
+                                        <th>Lieu / Quartier</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for depense in depenses %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ depense.get_categorie_display }}
+                                            </span>
+                                        </td>
+                                        <td class="fw-bold">{{ depense.montant }}</td>
+                                        <td>
+                                            <div>{{ depense.lieu_precis }}</div>
+                                            <small class="text-muted">{{ depense.quartier }}</small>
+                                        </td>
+                                        <td>{{ depense.date_depense|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <a href="/depense/{{ depense.id }}/modifier/" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button onclick="supprimerDepense({{ depense.id }})" 
+                                                    class="btn btn-sm btn-outline-danger" 
+                                                    title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <th>TOTAL</th>
+                                        <th colspan="4">{{ total_depenses|default:0|floatformat:0 }} FCFA</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune dépense enregistrée</h5>
+                            <p class="text-muted">Cet étudiant n'a pas encore de dépenses enregistrées.</p>
+                            <a href="{% url 'depense_create' etudiant.id %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter une première dépense
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Observations -->
+            {% if etudiant.notes %}
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-sticky-note me-2"></i>Observations de l'enquêteur
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="bg-light p-3 rounded">
+                        {{ etudiant.notes|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function supprimerDepense(depenseId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) {
+        $.ajax({
+            url: '/depense/' + depenseId + '/supprimer/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors de la suppression');
+                }
+            },
+            error: function() {
+                alert('Erreur réseau');
+            }
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

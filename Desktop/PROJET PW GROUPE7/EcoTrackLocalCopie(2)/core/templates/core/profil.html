@@ -1,0 +1,671 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mon Profil - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE PROFIL ===== */
+    .profile-header {
+        background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .profile-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+    
+    /* ===== FORMULAIRE PROFIL ===== */
+    .profile-form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .form-section-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.3rem;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    /* ===== BADGES ===== */
+    .badge-collection {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .badge-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        min-width: 120px;
+        transition: all 0.3s ease;
+    }
+    
+    .badge-item:hover {
+        background: #e2e8f0;
+        transform: scale(1.05);
+    }
+    
+    .badge-item.earned {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .badge-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* ===== ACTIVITÉS RÉCENTES ===== */
+    .activity-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    
+    .activity-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+    }
+    
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -9px;
+        top: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #3b82f6;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #3b82f6;
+    }
+    
+    /* ===== BOUTONS ===== */
+    .btn-primary-ecotrack {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary-ecotrack:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        color: white;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .profile-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .profile-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        
+        .badge-collection {
+            justify-content: center;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- En-tête du profil -->
+<div class="profile-header">
+    <div class="d-flex flex-column align-items-center text-center">
+        <div class="profile-avatar">
+            {% if user.enqueteur.photo %}
+                <img src="{{ user.enqueteur.photo.url }}" 
+                     alt="{{ user.username }}" 
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            {% else %}
+                {{ user.username|slice:":1"|upper }}
+            {% endif %}
+        </div>
+        <h1 class="mb-2">{{ user.username }}</h1>
+        <p class="mb-0 opacity-90">
+            {% if user.enqueteur.matricule %}
+                {{ user.enqueteur.matricule }} • Enquêteur EcoTrack
+            {% else %}
+                Enquêteur EcoTrack Local
+            {% endif %}
+        </p>
+        <div class="mt-2">
+            <span class="badge bg-light text-dark">
+                <i class="fas fa-calendar-alt me-1"></i>
+                Membre depuis {{ user.date_joined|date:"d/m/Y" }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques -->
+<div class="profile-stats">
+    <div class="profile-stat-card">
+        <div class="profile-stat-number">{{ total_etudiants }}</div>
+        <div class="stat-label">Étudiants enquêtés</div>
+        <div class="text-muted small mt-2">
+            {% if etudiants_ce_mois > 0 %}
+                <i class="fas fa-trend-up text-success me-1"></i>
+                <span>+{{ etudiants_ce_mois }} ce mois</span>
+            {% else %}
+                <i class="fas fa-minus me-1"></i>
+                <span>Aucun ce mois</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="profile-stat-card">
+        <div class="profile-stat-number">{{ total_depenses }}</div>
+        <div class="stat-label">Dépenses collectées</div>
+        <div class="text-muted small mt-2">
+            <i class="fas fa-money-bill-wave me-1"></i>
+            <span>Moyenne: {{ moyenne_generale|floatformat:0 }} FCFA</span>
+        </div>
+    </div>
+    
+    <div class="profile-stat-card">
+        <div class="profile-stat-number">{{ quartiers }}</div>
+        <div class="stat-label">Quartiers couverts</div>
+        <div class="text-muted small mt-2">
+            <i class="fas fa-map-marker-alt me-1"></i>
+            <span>{{ quartiers }} zones</span>
+        </div>
+    </div>
+    
+    <div class="profile-stat-card">
+        <div class="profile-stat-number">{{ anomalies_resolues }}</div>
+        <div class="stat-label">Anomalies résolues</div>
+        <div class="text-muted small mt-2">
+            <i class="fas fa-check-circle text-success me-1"></i>
+            <span>Résolution: {{ anomalies_resolues }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Informations personnelles -->
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="profile-form-card">
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-user-circle"></i>Informations personnelles
+                </h3>
+                
+                <form method="post" enctype="multipart/form-data" id="profileForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ user.email|default:'Non renseigné' }}" readonly>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Matricule</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ user.enqueteur.matricule|default:'' }}"
+                                   id="matricule" name="matricule"
+                                   placeholder="Ex: ENQ001">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" class="form-control" 
+                                   value="{{ user.enqueteur.telephone|default:'' }}"
+                                   id="telephone" name="telephone"
+                                   placeholder="Ex: 6XXXXXXXX">
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Photo de profil</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('photo').click()">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Formats: JPG, PNG • Max: 2MB</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end">
+                        <button type="button" class="btn btn-outline-secondary" onclick="annulerModifications()">
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn btn-primary-ecotrack">
+                            <i class="fas fa-save me-2"></i>Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-lock"></i>Sécurité du compte
+                </h3>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Pour des raisons de sécurité, certaines modifications doivent être faites via l'administration.
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'password_change' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-key me-2"></i>Changer le mot de passe
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="gererNotifications()">
+                        <i class="fas fa-bell me-2"></i>Gérer les notifications
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistiques détaillées -->
+        <div class="profile-form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-chart-bar"></i>Statistiques détaillées
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Répartition par sexe</h6>
+                            <div class="d-flex justify-content-between">
+                                <span>Hommes</span>
+                                <span class="fw-bold">{{ hommes_count }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Femmes</span>
+                                <span class="fw-bold">{{ femmes_count }}</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 10px;">
+                                {% if total_etudiants > 0 %}
+                                    <div class="progress-bar bg-primary" style="width: {% widthratio hommes_count total_etudiants 100 %}%"></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Total des dépenses</h6>
+                            <h3 class="text-success">{{ montant_total|floatformat:0 }} FCFA</h3>
+                            <small class="text-muted">Moyenne: {{ moyenne_generale|floatformat:0 }} FCFA par dépense</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <!-- Badges et succès -->
+        <div class="profile-form-card">
+            <h3 class="form-section-title">
+                <i class="fas fa-trophy"></i>Badges et succès
+            </h3>
+            
+            <div class="badge-collection">
+                <div class="badge-item {% if total_etudiants > 0 %}earned{% endif %}">
+                    <div class="badge-icon text-primary">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="badge-title">Premier étudiant</div>
+                    <small class="text-muted">
+                        {% if total_etudiants > 0 %}Débloqué{% else %}À débloquer{% endif %}
+                    </small>
+                </div>
+                
+                <div class="badge-item {% if total_etudiants >= 10 %}earned{% endif %}">
+                    <div class="badge-icon {% if total_etudiants >= 10 %}text-success{% else %}text-muted{% endif %}">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="badge-title">10 étudiants</div>
+                    <small class="text-muted">
+                        {% if total_etudiants >= 10 %}Débloqué{% else %}{{ total_etudiants }}/10{% endif %}
+                    </small>
+                </div>
+                
+                <div class="badge-item {% if anomalies_resolues > 0 %}earned{% endif %}">
+                    <div class="badge-icon {% if anomalies_resolues > 0 %}text-success{% else %}text-muted{% endif %}">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="badge-title">Qualité des données</div>
+                    <small class="text-muted">
+                        {% if anomalies_resolues > 0 %}Débloqué{% else %}À débloquer{% endif %}
+                    </small>
+                </div>
+                
+                <div class="badge-item {% if total_depenses >= 20 %}earned{% endif %}">
+                    <div class="badge-icon {% if total_depenses >= 20 %}text-warning{% else %}text-muted{% endif %}">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="badge-title">Analyste expert</div>
+                    <small class="text-muted">
+                        {% if total_depenses >= 20 %}Débloqué{% else %}{{ total_depenses }}/20{% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activités récentes -->
+        <div class="profile-form-card mt-4">
+            <h3 class="form-section-title">
+                <i class="fas fa-history"></i>Activités récentes
+            </h3>
+            
+            <div class="activity-timeline">
+                {% for depense in dernieres_depenses|slice:":3" %}
+                <div class="activity-item">
+                    <h6 class="mb-1">Dépense enregistrée</h6>
+                    <p class="text-muted small mb-0">
+                        {{ depense.categorie }} • {{ depense.montant }} FCFA
+                        <br>
+                        {{ depense.date_saisie|timesince }} ago
+                    </p>
+                </div>
+                {% endfor %}
+                
+                {% for etudiant in dernieres_etudiants|slice:":2" %}
+                <div class="activity-item">
+                    <h6 class="mb-1">Nouvel étudiant</h6>
+                    <p class="text-muted small mb-0">
+                        {{ etudiant.nom }}
+                        <br>
+                        {{ etudiant.date_collecte|timesince }} ago
+                    </p>
+                </div>
+                {% endfor %}
+                
+                {% if not dernieres_depenses and not dernieres_etudiants %}
+                <div class="activity-item">
+                    <h6 class="mb-1">Aucune activité récente</h6>
+                    <p class="text-muted small mb-0">
+                        Commencez par ajouter des étudiants ou des dépenses
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Informations système -->
+        <div class="profile-form-card mt-4">
+            <h3 class="form-section-title">
+                <i class="fas fa-info-circle"></i>Informations système
+            </h3>
+            
+            <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex justify-content-between">
+                    <span>Version EcoTrack</span>
+                    <span class="text-muted">1.1.0</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                    <span>Dernière connexion</span>
+                    <span class="text-muted">{{ user.last_login|date:"d/m/Y H:i"|default:"--" }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                    <span>Rôle</span>
+                    <span class="badge bg-primary">Enquêteur</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                    <span>Statut compte</span>
+                    <span class="badge bg-success">Actif</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Boutons d'action -->
+<div class="text-center mt-4">
+    <div class="btn-group" role="group">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
+        </a>
+        <button class="btn btn-primary-ecotrack" onclick="genererRapportActivite()">
+            <i class="fas fa-file-pdf me-2"></i>Rapport d'activité
+        </button>
+        <a href="{% url 'etudiant_create' %}" class="btn btn-success">
+            <i class="fas fa-plus-circle me-2"></i>Nouvelle enquête
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== GESTION FORMULAIRE =====
+    $('#profileForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Valider les données
+        const matricule = $('#matricule').val();
+        const telephone = $('#telephone').val();
+        
+        if (telephone && !/^[0-9+\s\-()]{8,}$/.test(telephone)) {
+            showToast('Format de téléphone invalide', 'warning');
+            return false;
+        }
+        
+        // Afficher un indicateur de chargement
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...');
+        
+        // Envoyer les données
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '{% url "profil" %}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                showToast('Profil mis à jour avec succès', 'success');
+                // Rafraîchir la page après 1 seconde
+                setTimeout(() => location.reload(), 1000);
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).html(originalText);
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    showToast(xhr.responseJSON.error, 'error');
+                } else {
+                    showToast('Erreur lors de la mise à jour', 'error');
+                }
+            }
+        });
+    });
+    
+    function annulerModifications() {
+        // Recharger la page pour annuler
+        location.reload();
+    }
+    
+    function gererNotifications() {
+        showToast('Cette fonctionnalité sera disponible bientôt', 'info');
+    }
+    
+    function genererRapportActivite() {
+        // Générer un rapport basé sur les données réelles
+        const totalEtudiants = '{{ total_etudiants }}';
+        const totalDepenses = '{{ total_depenses }}';
+        const montantTotal = '{{ montant_total|floatformat:0 }}';
+        const moyenne = '{{ moyenne_generale|floatformat:0 }}';
+        const quartiers = '{{ quartiers }}';
+        const anomalies = '{{ anomalies_resolues }}';
+        
+        const rapport = `
+            RAPPORT D'ACTIVITÉ - {{ user.username|upper }}
+            ==========================================
+            
+            Date : ${new Date().toLocaleDateString('fr-FR')}
+            
+            STATISTIQUES GÉNÉRALES :
+            ------------------------
+            - Étudiants enquêtés : ${totalEtudiants}
+            - Dépenses collectées : ${totalDepenses}
+            - Montant total : ${montantTotal} FCFA
+            - Moyenne par dépense : ${moyenne} FCFA
+            - Quartiers couverts : ${quartiers}
+            - Anomalies résolues : ${anomalies}
+            
+            RÉPARTITION PAR SEXE :
+            ----------------------
+            - Hommes : {{ hommes_count }}
+            - Femmes : {{ femmes_count }}
+            
+            PÉRIODE : Du 01/12/2025 au ${new Date().toLocaleDateString('fr-FR')}
+            
+            SYNTHÈSE :
+            ----------
+            Performance : ${totalEtudiants >= 10 ? 'Excellente' : totalEtudiants >= 5 ? 'Bonne' : 'En progression'}
+            Qualité des données : ${anomalies > 0 ? 'Vérifiée' : 'À vérifier'}
+            
+            SIGNATURE
+            ___________
+            {{ user.username }}
+            Enquêteur EcoTrack Local
+        `;
+        
+        const blob = new Blob([rapport], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `activite_{{ user.username }}_${new Date().toISOString().split('T')[0]}.txt`;
+        link.click();
+        
+        showToast('Rapport généré avec succès', 'success');
+    }
+    
+    function showToast(message, type = 'info') {
+        // Créer un toast simple
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+</script>
+{% endblock %}

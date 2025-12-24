@@ -1,0 +1,505 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Paramètres - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE PARAMÈTRES ===== */
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .settings-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+    
+    .settings-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .settings-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    /* ===== SECTION PARAMÈTRES ===== */
+    .settings-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .settings-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .settings-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.3rem;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    /* ===== SWITCHES ===== */
+    .form-check {
+        padding-left: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        margin-left: -3rem;
+        background-color: #e2e8f0;
+        border-color: #e2e8f0;
+    }
+    
+    .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    
+    .form-check-label {
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+    }
+    
+    .form-text {
+        margin-left: -3rem;
+        padding-left: 3rem;
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+    
+    /* ===== SELECT AVANCÉS ===== */
+    .select-enhanced {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: white;
+        color: #1f2937;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .select-enhanced:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    /* ===== BOUTONS DANGER ===== */
+    .danger-zone {
+        background: #fef2f2;
+        border: 2px solid #fee2e2;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .danger-title {
+        color: #dc2626;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    /* ===== MODAL CONFIRMATION ===== */
+    .confirmation-modal .modal-body {
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .confirmation-icon {
+        font-size: 4rem;
+        color: #ef4444;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .settings-card {
+            padding: 1.5rem;
+        }
+        
+        .settings-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <!-- En-tête -->
+    <div class="settings-card">
+        <div class="settings-header">
+            <div class="settings-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div>
+                <h1 class="mb-2">Paramètres de l'application</h1>
+                <p class="text-muted mb-0">
+                    Personnalisez votre expérience EcoTrack Local selon vos préférences
+                </p>
+            </div>
+        </div>
+        
+        <!-- Notifications -->
+        <div class="settings-section">
+            <h3 class="settings-title">
+                <i class="fas fa-bell"></i>Notifications
+            </h3>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="notifAnomalies" checked>
+                <label class="form-check-label" for="notifAnomalies">
+                    Alertes anomalies
+                </label>
+                <div class="form-text">
+                    Recevoir des alertes quand de nouvelles anomalies sont détectées
+                </div>
+            </div>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="notifRapports" checked>
+                <label class="form-check-label" for="notifRapports">
+                    Rapports hebdomadaires
+                </label>
+                <div class="form-text">
+                    Recevoir un résumé hebdomadaire de votre activité
+                </div>
+            </div>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="notifSons">
+                <label class="form-check-label" for="notifSons">
+                    Sons de notification
+                </label>
+                <div class="form-text">
+                    Activer les sons pour les notifications importantes
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interface -->
+        <div class="settings-section">
+            <h3 class="settings-title">
+                <i class="fas fa-palette"></i>Interface
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Thème</label>
+                    <select class="select-enhanced" id="themeSelect">
+                        <option value="light" selected>Clair</option>
+                        <option value="dark">Sombre</option>
+                        <option value="auto">Automatique (système)</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Densité d'affichage</label>
+                    <select class="select-enhanced" id="densitySelect">
+                        <option value="compact">Compact</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="comfortable">Confortable</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="animations" checked>
+                <label class="form-check-label" for="animations">
+                    Animations
+                </label>
+                <div class="form-text">
+                    Activer les animations et transitions
+                </div>
+            </div>
+        </div>
+        
+        <!-- Données -->
+        <div class="settings-section">
+            <h3 class="settings-title">
+                <i class="fas fa-database"></i>Gestion des données
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Export automatique</label>
+                    <select class="select-enhanced" id="autoExport">
+                        <option value="never">Jamais</option>
+                        <option value="daily" selected>Quotidien</option>
+                        <option value="weekly">Hebdomadaire</option>
+                        <option value="monthly">Mensuel</option>
+                    </select>
+                    <div class="form-text">
+                        Fréquence des sauvegardes automatiques
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Format d'export par défaut</label>
+                    <select class="select-enhanced" id="exportFormat">
+                        <option value="csv" selected>CSV (Excel)</option>
+                        <option value="pdf">PDF</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="syncAuto">
+                <label class="form-check-label" for="syncAuto">
+                    Synchronisation automatique
+                </label>
+                <div class="form-text">
+                    Synchroniser les données avec le serveur en temps réel
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sauvegarde -->
+        <div class="text-center mt-4">
+            <button class="btn btn-primary-ecotrack" onclick="sauvegarderParametres()">
+                <i class="fas fa-save me-2"></i>Enregistrer les paramètres
+            </button>
+            <button class="btn btn-outline-secondary" onclick="reinitialiserParametres()">
+                <i class="fas fa-undo me-2"></i>Réinitialiser
+            </button>
+        </div>
+    </div>
+    
+    <!-- Zone dangereuse -->
+    <div class="danger-zone">
+        <h3 class="danger-title">
+            <i class="fas fa-exclamation-triangle"></i>Zone dangereuse
+        </h3>
+        <p class="text-muted mb-4">
+            Ces actions sont irréversibles. Soyez certain de ce que vous faites.
+        </p>
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <button class="btn btn-outline-danger w-100" onclick="viderCache()">
+                    <i class="fas fa-broom me-2"></i>Vider le cache
+                </button>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-outline-danger w-100" onclick="reinitialiserDonnees()">
+                    <i class="fas fa-trash-alt me-2"></i>Réinitialiser les données
+                </button>
+            </div>
+            <div class="col-md-12">
+                <button class="btn btn-danger w-100" onclick="supprimerCompte()">
+                    <i class="fas fa-user-slash me-2"></i>Supprimer mon compte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal confirmation suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body confirmation-modal">
+                <div class="confirmation-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h4 class="mb-3">Êtes-vous absolument sûr ?</h4>
+                <p class="text-muted mb-4">
+                    Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+                </p>
+                <div class="d-flex gap-3">
+                    <button class="btn btn-outline-secondary w-50" data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+                    <button class="btn btn-danger w-50" onclick="confirmerSuppression()">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== INITIALISATION =====
+    $(document).ready(function() {
+        chargerParametres();
+    });
+    
+    // ===== GESTION PARAMÈTRES =====
+    function chargerParametres() {
+        // Charger depuis localStorage
+        const theme = localStorage.getItem('ecotrack_theme') || 'light';
+        const density = localStorage.getItem('ecotrack_density') || 'normal';
+        const autoExport = localStorage.getItem('ecotrack_autoExport') || 'daily';
+        
+        // Appliquer les valeurs
+        $('#themeSelect').val(theme);
+        $('#densitySelect').val(density);
+        $('#autoExport').val(autoExport);
+        
+        // Appliquer le thème
+        appliquerTheme(theme);
+    }
+    
+    function sauvegarderParametres() {
+        // Sauvegarder dans localStorage
+        localStorage.setItem('ecotrack_theme', $('#themeSelect').val());
+        localStorage.setItem('ecotrack_density', $('#densitySelect').val());
+        localStorage.setItem('ecotrack_autoExport', $('#autoExport').val());
+        
+        // Appliquer le thème
+        appliquerTheme($('#themeSelect').val());
+        
+        showToast('Paramètres enregistrés avec succès', 'success');
+    }
+    
+    function reinitialiserParametres() {
+        if (confirm('Réinitialiser tous les paramètres aux valeurs par défaut ?')) {
+            localStorage.clear();
+            chargerParametres();
+            showToast('Paramètres réinitialisés', 'info');
+        }
+    }
+    
+    function appliquerTheme(theme) {
+        if (theme === 'dark') {
+            $('body').addClass('theme-dark');
+        } else {
+            $('body').removeClass('theme-dark');
+        }
+    }
+    
+    // ===== ACTIONS DANGEREUSES =====
+    function viderCache() {
+        if (confirm('Vider le cache de l\'application ? Les préférences locales seront effacées.')) {
+            // Effacer le cache local
+            localStorage.removeItem('lastLogin');
+            localStorage.removeItem('ecotrack_cache');
+            
+            showToast('Cache vidé avec succès', 'success');
+            
+            // Redémarrer l'application
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+    }
+    
+    function reinitialiserDonnees() {
+        if (confirm('ATTENTION : Cette action supprimera TOUTES vos données locales. Êtes-vous sûr ?')) {
+            showToast('Réinitialisation en cours...', 'info');
+            
+            // Simulation
+            setTimeout(() => {
+                showToast('Données réinitialisées. Redémarrage...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            }, 2000);
+        }
+    }
+    
+    function supprimerCompte() {
+        // Afficher le modal de confirmation
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    function confirmerSuppression() {
+        showToast('Suppression du compte en cours...', 'info');
+        
+        // Simulation de suppression
+        setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            showToast('Compte supprimé. Redirection...', 'success');
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }, 1500);
+    }
+    
+    // ===== UTILITAIRES =====
+    function showToast(message, type = 'info') {
+        const toastHtml = `
+            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        $('.toast-container').remove();
+        $('body').append(`<div class="toast-container position-fixed bottom-0 end-0 p-3">${toastHtml}</div>`);
+        
+        const toastEl = $('.toast').last()[0];
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+        
+        setTimeout(() => toast.hide(), 3000);
+    }
+</script>
+
+<!-- CSS pour le thème sombre -->
+<style>
+    .theme-dark {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+    
+    .theme-dark .settings-card,
+    .theme-dark .danger-zone {
+        background: #374151;
+        color: #f9fafb;
+    }
+    
+    .theme-dark .form-check-label {
+        color: #f9fafb;
+    }
+    
+    .theme-dark .select-enhanced {
+        background: #4b5563;
+        border-color: #6b7280;
+        color: #f9fafb;
+    }
+    
+    .theme-dark .form-text {
+        color: #d1d5db;
+    }
+</style>
+{% endblock %}

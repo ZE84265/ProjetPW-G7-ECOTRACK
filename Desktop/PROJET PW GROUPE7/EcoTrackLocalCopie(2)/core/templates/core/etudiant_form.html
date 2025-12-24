@@ -1,0 +1,869 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Nouvel Étudiant - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== FORMULAIRE ÉTUDIANT SPÉCIFIQUE ===== */
+    .form-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #2563eb;
+        animation: fadeInUp 0.6s ease;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .form-section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .form-section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+    
+    .form-section-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .form-section-subtitle {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-top: 0.25rem;
+    }
+    
+    /* ===== CHAMPS DE FORMULAIRE AVANCÉS ===== */
+    .form-group-enhanced {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .form-label-enhanced {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+    
+    .form-control-enhanced {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+    
+    .form-control-enhanced:focus {
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-control-enhanced:disabled {
+        background: #f3f4f6;
+        cursor: not-allowed;
+    }
+    
+    /* ===== PREVIEW PHOTO ===== */
+    .photo-preview-container {
+        border: 2px dashed #e2e8f0;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .photo-preview-container:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+    }
+    
+    .photo-preview-container.dragover {
+        border-color: #10b981;
+        background: #ecfdf5;
+    }
+    
+    .photo-preview-icon {
+        font-size: 3rem;
+        color: #94a3b8;
+        margin-bottom: 1rem;
+    }
+    
+    .photo-preview-image {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        display: none;
+    }
+    
+    /* ===== BADGE CODE ENQUÊTE ===== */
+    .code-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+        margin-bottom: 1rem;
+    }
+    
+    /* ===== GPS AUTO ===== */
+    .gps-container {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+    
+    .gps-button {
+        padding: 0.875rem 1.5rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    
+    .gps-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    .gps-button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .gps-status {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .gps-status.success {
+        color: #10b981;
+    }
+    
+    .gps-status.error {
+        color: #ef4444;
+    }
+    
+    /* ===== BARRE DE PROGRESSION ===== */
+    .progress-container {
+        margin-bottom: 2rem;
+    }
+    
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e2e8f0;
+        transform: translateY(-50%);
+        z-index: 1;
+    }
+    
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #9ca3af;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+    
+    .progress-step.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .progress-step.completed {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+    }
+    
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    
+    /* ===== BOUTONS ACTION ===== */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .btn-form {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 150px;
+    }
+    
+    .btn-form-primary {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+    }
+    
+    .btn-form-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-form-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .btn-form-secondary:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
+    }
+    
+    /* ===== VALIDATION EN TEMPS RÉEL ===== */
+    .validation-feedback {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .validation-success {
+        color: #10b981;
+    }
+    
+    .validation-error {
+        color: #ef4444;
+    }
+    
+    .validation-warning {
+        color: #f59e0b;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .gps-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn-form {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% if action == 'Créer' %}
+<input type="hidden" name="enqueteur" value="{{ enqueteur.id }}">
+{% endif %}
+
+{% block content %}
+<!-- Barre de progression -->
+<div class="progress-container">
+    <div class="progress-steps">
+        <div class="progress-step active">1</div>
+        <div class="progress-step">2</div>
+    </div>
+    <div class="progress-labels">
+        <span>Identification</span>
+        <span>Saisie des dépenses</span>
+    </div>
+</div>
+
+<!-- Formulaire Étudiant -->
+<div class="form-section">
+    <div class="form-section-header">
+        <div class="form-section-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div>
+            <h2 class="form-section-title">Fiche d'Identification Étudiant</h2>
+            <p class="form-section-subtitle">
+                Renseignez les informations de base de l'étudiant enquêté
+            </p>
+        </div>
+    </div>
+    
+    <!-- Code d'enquête généré -->
+    <div class="code-badge">
+        <i class="fas fa-hashtag me-2"></i>
+        <span id="codeEnquete">Génération automatique...</span>
+        <button type="button" class="btn btn-sm btn-outline-primary ms-3" onclick="genererCode()">
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" id="etudiantForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Colonne 1 : Informations personnelles -->
+            <div class="col-lg-6">
+                <div class="form-group-enhanced">
+                    <label class="form-label-enhanced" for="{{ form.nom.id_for_label }}">
+                        <i class="fas fa-user me-1"></i>Nom complet *
+                    </label>
+                    {{ form.nom }}
+                    <div class="validation-feedback" id="nomFeedback"></div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced" for="{{ form.age.id_for_label }}">
+                                <i class="fas fa-birthday-cake me-1"></i>Âge *
+                            </label>
+                            {{ form.age }}
+                            <div class="validation-feedback" id="ageFeedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced" for="{{ form.sexe.id_for_label }}">
+                                <i class="fas fa-venus-mars me-1"></i>Sexe *
+                            </label>
+                            {{ form.sexe }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced" for="{{ form.niveau.id_for_label }}">
+                                <i class="fas fa-graduation-cap me-1"></i>Niveau d'études *
+                            </label>
+                            {{ form.niveau }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced" for="{{ form.universite.id_for_label }}">
+                                <i class="fas fa-university me-1"></i>Établissement *
+                            </label>
+                            {{ form.universite }}
+                            <div class="validation-feedback" id="universiteFeedback"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Colonne 2 : Localisation et photo -->
+            <div class="col-lg-6">
+                <div class="form-group-enhanced">
+                    <label class="form-label-enhanced" for="{{ form.quartier.id_for_label }}">
+                        <i class="fas fa-map-marker-alt me-1"></i>Quartier de résidence
+                    </label>
+                    {{ form.quartier }}
+                    <div id="autreQuartierContainer" style="display: none; margin-top: 10px;">
+                        <label class="form-label-enhanced" for="{{ form.quartier_autre.id_for_label }}">
+                            <i class="fas fa-pen me-1"></i>Nom du quartier
+                        </label>
+                    {{ form.quartier_autre }}
+</div>
+                </div>
+                
+                <!-- Géolocalisation -->
+                <div class="form-group-enhanced">
+                    <label class="form-label-enhanced">
+                        <i class="fas fa-map-pin me-1"></i>Géolocalisation (optionnel)
+                    </label>
+                    <div class="gps-container">
+                        <div class="flex-grow-1">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <input type="number" 
+                                           step="0.000001" 
+                                           class="form-control-enhanced" 
+                                           id="gpsLat" 
+                                           placeholder="Latitude"
+                                           value="{{ form.gps_lat.value|default_if_none:'' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="number" 
+                                           step="0.000001" 
+                                           class="form-control-enhanced" 
+                                           id="gpsLng" 
+                                           placeholder="Longitude"
+                                           value="{{ form.gps_lng.value|default_if_none:'' }}">
+                                </div>
+                            </div>
+                            <div class="gps-status" id="gpsStatus">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Cliquez sur "GPS Auto" pour localiser automatiquement</span>
+                            </div>
+                        </div>
+                        <button type="button" class="gps-button" id="btnGpsAuto">
+                            <i class="fas fa-satellite me-1"></i>GPS Auto
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Photo étudiant -->
+                <div class="form-group-enhanced">
+                    <label class="form-label-enhanced">
+                        <i class="fas fa-camera me-1"></i>Photo de l'étudiant (optionnel)
+                    </label>
+                    <div class="photo-preview-container" id="photoPreview" onclick="document.getElementById('photoInput').click()">
+                        <div class="photo-preview-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="mb-2">Cliquez ou glissez-déposez une photo</p>
+                        <p class="text-muted small">Formats: JPG, PNG • Max: 5MB</p>
+                        <img class="photo-preview-image" id="photoPreviewImage" alt="Preview">
+                    </div>
+                    {{ form.photo }}
+                    <input type="file" 
+                           id="photoInput" 
+                           accept="image/*" 
+                           style="display: none;"
+                           onchange="previewPhoto(event)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Observations -->
+        <div class="form-group-enhanced">
+            <label class="form-label-enhanced" for="{{ form.notes.id_for_label }}">
+                <i class="fas fa-sticky-note me-1"></i>Observations de l'enquêteur
+            </label>
+            {{ form.notes }}
+            <div class="text-muted small mt-1">
+                <i class="fas fa-lightbulb me-1"></i>
+                Notez tout élément pertinent (attitude, conditions de vie, etc.)
+            </div>
+        </div>
+        
+        <!-- Boutons d'action -->
+        <div class="form-actions">
+            <button type="button" class="btn-form btn-form-secondary" onclick="window.history.back()">
+                <i class="fas fa-arrow-left me-2"></i>Retour
+            </button>
+            
+            <button type="button" class="btn-form btn-form-secondary" onclick="previsualiserFiche()">
+                <i class="fas fa-eye me-2"></i>Prévisualiser
+            </button>
+            
+            <button type="submit" class="btn-form btn-form-primary" id="btnSubmit">
+                <i class="fas fa-save me-2"></i>Enregistrer et continuer
+                <span class="ms-2"><i class="fas fa-arrow-right"></i></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal de prévisualisation -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Prévisualisation de la fiche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="previewContent">
+                <!-- Contenu généré par JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== INITIALISATION =====
+    $(document).ready(function() {
+        // Générer un code d'enquête initial
+        genererCode();
+        
+        // Configurer les champs avec les classes Bootstrap
+        $('input, select, textarea').addClass('form-control-enhanced');
+        
+        // Validation en temps réel
+        $('#{{ form.nom.id_for_label }}').on('input', validerNom);
+        $('#{{ form.age.id_for_label }}').on('input', validerAge);
+        $('#{{ form.universite.id_for_label }}').on('input', validerUniversite);
+        $('#{{ form.quartier.id_for_label }}').on('input', validerQuartier);
+    });
+    
+    // ===== GÉNÉRATION CODE ENQUÊTE =====
+    function genererCode() {
+        // Format: EC{ANNEE}_{NUMÉRO}
+        const annee = new Date().getFullYear().toString().substr(-2);
+        const numero = Math.floor(Math.random() * 900) + 100; // 100-999
+        
+        const code = `EC${annee}_${numero}`;
+        $('#codeEnquete').text(code);
+        
+        // Mettre à jour le champ caché si existe, sinon créer
+        if ($('#id_code_enquete').length === 0) {
+            $('#etudiantForm').append(`<input type="hidden" name="code_enquete" id="id_code_enquete" value="${code}">`);
+        } else {
+            $('#id_code_enquete').val(code);
+        }
+        
+        return code;
+    }
+    
+    // ===== GPS AUTO =====
+    $('#btnGpsAuto').click(function() {
+        const btn = $(this);
+        const status = $('#gpsStatus');
+        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Localisation...');
+        status.html('<i class="fas fa-spinner fa-spin"></i> <span>Localisation en cours...</span>');
+        
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                // Succès
+                function(position) {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lng = position.coords.longitude.toFixed(6);
+                    
+                    $('#gpsLat').val(lat);
+                    $('#gpsLng').val(lng);
+                    
+                    // Mettre à jour les champs du formulaire Django
+                    $('#{{ form.gps_lat.id_for_label }}').val(lat);
+                    $('#{{ form.gps_lng.id_for_label }}').val(lng);
+                    
+                    status.html(`<i class="fas fa-check-circle"></i> <span class="success">Localisation réussie: ${lat}, ${lng}</span>`);
+                    status.addClass('success');
+                    
+                    btn.prop('disabled', false).html('<i class="fas fa-satellite me-1"></i>GPS Auto');
+                },
+                // Erreur
+                function(error) {
+                    let message = "Erreur de géolocalisation: ";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += "Permission refusée";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += "Position non disponible";
+                            break;
+                        case error.TIMEOUT:
+                            message += "Timeout";
+                            break;
+                        default:
+                            message += "Erreur inconnue";
+                    }
+                    
+                    status.html(`<i class="fas fa-exclamation-triangle"></i> <span class="error">${message}</span>`);
+                    status.addClass('error');
+                    
+                    btn.prop('disabled', false).html('<i class="fas fa-satellite me-1"></i>GPS Auto');
+                },
+                // Options
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            status.html('<i class="fas fa-exclamation-triangle"></i> <span class="error">Géolocalisation non supportée par votre navigateur</span>');
+            status.addClass('error');
+            btn.prop('disabled', false).html('<i class="fas fa-satellite me-1"></i>GPS Auto');
+        }
+    });
+    
+    // ===== PRÉVISUALISATION PHOTO =====
+    function previewPhoto(event) {
+        const input = event.target;
+        const preview = $('#photoPreviewImage');
+        const container = $('#photoPreview');
+        const icon = $('.photo-preview-icon');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.attr('src', e.target.result);
+                preview.show();
+                icon.hide();
+                container.find('p').hide();
+                container.removeClass('photo-preview-container').addClass('photo-preview-active');
+            };
+            
+            reader.readAsDataURL(input.files[0]);
+            
+            // Mettre à jour le champ du formulaire Django
+            $('#{{ form.photo.id_for_label }}').val(input.files[0].name);
+        }
+    }
+    
+    // ===== VALIDATION EN TEMPS RÉEL =====
+    function validerNom() {
+        const nom = $('#{{ form.nom.id_for_label }}').val();
+        const feedback = $('#nomFeedback');
+        
+        if (nom.length < 2) {
+            feedback.html('<i class="fas fa-times-circle"></i> <span class="validation-error">Le nom doit contenir au moins 2 caractères</span>');
+            return false;
+        } else if (nom.length > 100) {
+            feedback.html('<i class="fas fa-times-circle"></i> <span class="validation-error">Le nom ne doit pas dépasser 100 caractères</span>');
+            return false;
+        } else {
+            feedback.html('<i class="fas fa-check-circle"></i> <span class="validation-success">Nom valide</span>');
+            return true;
+        }
+    }
+    
+    function validerAge() {
+        const age = parseInt($('#{{ form.age.id_for_label }}').val());
+        const feedback = $('#ageFeedback');
+        
+        if (isNaN(age)) {
+            feedback.html('<i class="fas fa-times-circle"></i> <span class="validation-error">Veuillez entrer un âge valide</span>');
+            return false;
+        } else if (age < 16 || age > 40) {
+            feedback.html('<i class="fas fa-exclamation-triangle"></i> <span class="validation-warning">Âge hors plage typique (16-40)</span>');
+            return true; // Warning mais pas bloquant
+        } else {
+            feedback.html('<i class="fas fa-check-circle"></i> <span class="validation-success">Âge valide</span>');
+            return true;
+        }
+    }
+    
+    function validerUniversite() {
+        const universite = $('#{{ form.universite.id_for_label }}').val();
+        const feedback = $('#universiteFeedback');
+        
+        if (universite.length < 2) {
+            feedback.html('<i class="fas fa-times-circle"></i> <span class="validation-error">Nom d\'établissement trop court</span>');
+            return false;
+        } else {
+            feedback.html('<i class="fas fa-check-circle"></i> <span class="validation-success">Établissement valide</span>');
+            return true;
+        }
+    }
+    
+    function validerQuartier() {
+        const quartier = $('#{{ form.quartier.id_for_label }}').val();
+        const feedback = $('#quartierFeedback');
+        
+        if (quartier.length < 2) {
+            feedback.html('<i class="fas fa-times-circle"></i> <span class="validation-error">Nom de quartier trop court</span>');
+            return false;
+        } else {
+            feedback.html('<i class="fas fa-check-circle"></i> <span class="validation-success">Quartier valide</span>');
+            return true;
+        }
+    }
+    
+    // ===== PRÉVISUALISATION FICHE =====
+    function previsualiserFiche() {
+        const nom = $('#{{ form.nom.id_for_label }}').val() || 'Non renseigné';
+        const age = $('#{{ form.age.id_for_label }}').val() || 'Non renseigné';
+        const sexe = $('#{{ form.sexe.id_for_label }}').val() || 'Non renseigné';
+        const niveau = $('#{{ form.niveau.id_for_label }} option:selected').text() || 'Non renseigné';
+        const universite = $('#{{ form.universite.id_for_label }}').val() || 'Non renseigné';
+        const quartier = $('#{{ form.quartier.id_for_label }}').val() || 'Non renseigné';
+        const notes = $('#{{ form.notes.id_for_label }}').val() || 'Aucune observation';
+        
+        const previewHtml = `
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Prévisualisation - ${$('#codeEnquete').text()}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Nom:</th>
+                                    <td>${nom}</td>
+                                </tr>
+                                <tr>
+                                    <th>Âge:</th>
+                                    <td>${age} ans</td>
+                                </tr>
+                                <tr>
+                                    <th>Sexe:</th>
+                                    <td>${sexe === 'M' ? 'Masculin' : 'Féminin'}</td>
+                                </tr>
+                                <tr>
+                                    <th>Niveau:</th>
+                                    <td>${niveau}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Établissement:</th>
+                                    <td>${universite}</td>
+                                </tr>
+                                <tr>
+                                    <th>Quartier:</th>
+                                    <td>${quartier}</td>
+                                </tr>
+                                <tr>
+                                    <th>GPS:</th>
+                                    <td>${$('#gpsLat').val() || 'Non'} / ${$('#gpsLng').val() || 'renseigné'}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Observations:</h6>
+                        <p class="text-muted">${notes}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#previewContent').html(previewHtml);
+        new bootstrap.Modal(document.getElementById('previewModal')).show();
+    }
+    
+    // ===== DRAG & DROP PHOTO =====
+    const photoPreview = document.getElementById('photoPreview');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        photoPreview.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        photoPreview.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        photoPreview.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        photoPreview.classList.add('dragover');
+    }
+    
+    function unhighlight() {
+        photoPreview.classList.remove('dragover');
+    }
+    
+    photoPreview.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            const input = document.getElementById('photoInput');
+            input.files = files;
+            previewPhoto({ target: input });
+        }
+    }
+    
+    // ===== VALIDATION FORMULAIRE =====
+    $('#etudiantForm').submit(function(e) {
+        // Valider tous les champs
+        const nomValide = validerNom();
+        const ageValide = validerAge();
+        const universiteValide = validerUniversite();
+        const quartierValide = validerQuartier();
+        
+        if (!nomValide || !ageValide || !universiteValide || !quartierValide) {
+            e.preventDefault();
+            alert('Veuillez corriger les erreurs dans le formulaire avant de soumettre.');
+            return false;
+        }
+        
+        // Afficher animation de chargement
+        $('#btnSubmit').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...');
+        
+        return true;
+    });
+</script>
+{% endblock %}

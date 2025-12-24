@@ -1,0 +1,563 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Connexion - EcoTrack Local{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== PAGE DE CONNEXION SPÉCIALE ===== */
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232563eb' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        animation: float 20s linear infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0) translateX(0); }
+        50% { transform: translateY(-20px) translateX(20px); }
+        100% { transform: translateY(0) translateX(0); }
+    }
+    
+    .login-container {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        animation: slideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        transform-origin: center bottom;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-header::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: -20px;
+        right: -20px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+    }
+    
+    .login-logo {
+        font-size: 2.8rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        background: linear-gradient(90deg, #ffffff 0%, #e0f2fe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .login-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .login-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .login-body {
+        padding: 2.5rem 2rem;
+    }
+    
+    .form-floating-custom {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-floating-custom input {
+        width: 100%;
+        padding: 1.2rem 1rem 0.8rem;
+        font-size: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+    
+    .form-floating-custom label {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: #64748b;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        font-size: 1rem;
+    }
+    
+    .form-floating-custom input:focus,
+    .form-floating-custom input:not(:placeholder-shown) {
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-floating-custom input:focus + label,
+    /* ===== CHAMPS DE FORMULAIRE SIMPLIFIÉS ===== */
+    .form-group-simple {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control-simple {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem; /* Plus d'espace à gauche pour l'icône */
+        font-size: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: white;
+        transition: all 0.3s ease;
+        outline: none;
+        color: #1f2937;
+    }
+
+        .form-control-simple:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+        .form-label-simple {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+
+   /* Container pour champ avec icône */
+    .input-with-icon-simple {
+        position: relative;
+    } 
+
+    .input-with-icon-simple .icon-left {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+
+    .password-toggle-btn {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 10;
+    }
+
+    .password-toggle-btn:hover {
+        color: #2563eb;
+    }
+    
+    .login-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
+    }
+    
+    .login-btn:active {
+        transform: translateY(-1px);
+    }
+    
+    .login-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
+    
+    .login-btn:focus:not(:active)::after {
+        animation: ripple 1s ease-out;
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .login-links {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+    }
+    
+    .login-links a {
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 0.5rem 0;
+    }
+    
+    .login-links a:hover {
+        color: #2563eb;
+    }
+    
+    .login-links a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #2563eb;
+        transition: width 0.3s ease;
+    }
+    
+    .login-links a:hover::after {
+        width: 100%;
+    }
+    
+    .alert-login {
+        border-radius: 12px;
+        border: none;
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        animation: shake 0.5s ease;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    /* Mode sombre optionnel */
+    @media (prefers-color-scheme: dark) {
+        .login-page {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .login-card {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .form-floating-custom input {
+            background: #334155;
+            border-color: #475569;
+            color: white;
+        }
+        
+        .form-floating-custom input:focus {
+            background: #475569;
+        }
+        
+        .form-floating-custom label {
+            color: #94a3b8;
+        }
+        
+        .login-footer {
+            border-top-color: #475569;
+        }
+        
+        .login-links a {
+            color: #94a3b8;
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 576px) {
+        .login-container {
+            padding: 1rem;
+        }
+        
+        .login-card {
+            border-radius: 20px;
+        }
+        
+        .login-header {
+            padding: 2rem 1.5rem;
+        }
+        
+        .login-body {
+            padding: 2rem 1.5rem;
+        }
+        
+        .login-links {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <!-- En-tête -->
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h1 class="login-title">EcoTrack Local</h1>
+                <p class="login-subtitle">Système de suivi des coûts de vie</p>
+            </div>
+            
+            <!-- Corps du formulaire -->
+            <div class="login-body">
+                <!-- Messages d'erreur/succès -->
+                {% if form.errors %}
+                <div class="alert alert-danger alert-login animate__animated animate__shakeX">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Identifiants incorrects. Veuillez réessayer.
+                </div>
+                {% endif %}
+                
+                {% if next %}
+                    {% if user.is_authenticated %}
+                    <div class="alert alert-warning alert-login">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Votre compte n'a pas accès à cette page.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info alert-login">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Veuillez vous connecter pour accéder à cette page.
+                    </div>
+                    {% endif %}
+                {% endif %}
+                
+                <!-- Formulaire de connexion -->
+            <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+    
+                <!-- Champ Matricule/Username -->
+                <div class="form-group-simple">
+                    <label class="form-label-simple" for="id_username">
+                        <i class="fas fa-user me-2"></i>Matricule ou nom d'utilisateur
+                    </label>
+                <div class="input-with-icon-simple">
+                        <input type="text" 
+                            name="username" 
+                            id="id_username" 
+                            class="form-control-simple"
+                            required
+                            autocomplete="username"
+                            autofocus
+                            placeholder="admin">
+                    </div>
+                </div>
+    
+                <!-- Champ Mot de passe -->
+                <div class="form-group-simple">
+                    <label class="form-label-simple" for="id_password">
+                        <i class="fas fa-lock me-2"></i>Mot de passe
+                    </label>
+                    <div class="input-with-icon-simple">
+                        <input type="password" 
+                            name="password" 
+                            id="id_password" 
+                            class="form-control-simple"
+                            required
+                            autocomplete="current-password"
+                            placeholder="1234">
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Options supplémentaires -->
+    <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox" id="rememberMe">
+        <label class="form-check-label" for="rememberMe">
+            Se souvenir de moi
+        </label>
+    </div>
+    
+    <!-- Bouton de connexion -->
+    <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+    </button>
+    
+    <input type="hidden" name="next" value="{{ next }}">
+</form>
+                
+                <!-- Liens utiles -->
+                <div class="login-footer">
+                    <div class="login-links">
+                        <a href="{% url 'password_reset' %}">
+                            <i class="fas fa-key me-1"></i>Mot de passe oublié ?
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-question-circle me-1"></i>Aide
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-user-plus me-1"></i>Inscription
+                        </a>
+                    </div>
+                    
+                    <p class="text-muted mt-4 mb-0">
+                        <small>
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Vos données sont sécurisées et confidentielles
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informations supplémentaires -->
+        <div class="text-center mt-4">
+            <p class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Projet AS3 - ISSEA 2025
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Animation des champs de formulaire
+        $('.form-floating-custom input').each(function() {
+            if ($(this).val() !== '') {
+                $(this).next('label').addClass('active');
+            }
+        });
+        
+        // Effet de focus sur les champs
+        $('.form-floating-custom input').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            if ($(this).val() === '') {
+                $(this).parent().removeClass('focused');
+            }
+        });
+        
+        // Animation du bouton
+        $('.login-btn').on('mouseenter', function() {
+            $(this).css('transform', 'translateY(-3px)');
+        }).on('mouseleave', function() {
+            $(this).css('transform', 'translateY(0)');
+        });
+        
+        // Auto-hide les alertes après 5 secondes
+        setTimeout(function() {
+            $('.alert-login').fadeOut('slow');
+        }, 5000);
+        
+        // Effet de saisie automatique pour le démo (à retirer en production)
+        if (window.location.href.indexOf('demo') > -1) {
+            setTimeout(function() {
+                $('#id_username').val('enqueteur01');
+                $('#id_password').val('demo123');
+                $('#id_username').trigger('focus');
+            }, 500);
+        }
+    });
+</script>
+{% endblock %}
+
+// Fonction pour voir/masquer le mot de passe
+function togglePassword() {
+    const passwordInput = document.getElementById('id_password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+        eyeIcon.title = "Masquer le mot de passe";
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+        eyeIcon.title = "Afficher le mot de passe";
+    }
+}
+
+// Focus sur le premier champ
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('id_username').focus();
+});
